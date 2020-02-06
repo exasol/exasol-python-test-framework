@@ -18,17 +18,17 @@ if PY3:
         return s.encode("latin-1")
 
     getcwdu = os.getcwd
-    unicode = str
+    str = str
     xrange = range
 else:
     def u(s):
-        return unicode(s)
+        return str(s)
 
     def b(s):
         return s
 
-    getcwdu = os.getcwdu
-    unicode = unicode
+    getcwdu = os.getcwd
+    str = str
     xrange = xrange
 
 

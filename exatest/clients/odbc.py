@@ -16,8 +16,7 @@ class ODBCClient(object):
         params = self.params.copy()
         params.update(kwargs)
         self.conn = pyodbc.connect(**params)
-        self.conn.setencoding(str, encoding='utf-8') 
-        self.conn.setencoding(unicode, encoding='utf-8') 
+        self.conn.setencoding(encoding='utf-8')
         self.cursor = self.conn.cursor()
         self._setScriptLanguagesFromArgs()
 

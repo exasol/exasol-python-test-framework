@@ -24,7 +24,7 @@ import sys
 import warnings
 
 from ._compat import PY3
-from ._compat import unicode
+from ._compat import str
 from ._compat import getcwdu
 
 
@@ -101,7 +101,7 @@ class DummyAuthorizer(object):
         """
         if self.has_user(username):
             raise ValueError('user %r already exists' % username)
-        if not isinstance(homedir, unicode):
+        if not isinstance(homedir, str):
             homedir = homedir.decode('utf8')
         if not os.path.isdir(homedir):
             raise ValueError('no such directory: %r' % homedir)
@@ -206,7 +206,7 @@ class DummyAuthorizer(object):
             return perm in self.user_table[username]['perm']
 
         path = os.path.normcase(path)
-        for dir in self.user_table[username]['operms'].keys():
+        for dir in list(self.user_table[username]['operms'].keys()):
             operm, recursive = self.user_table[username]['operms'][dir]
             if self._issubpath(path, dir):
                 if recursive:
@@ -317,7 +317,7 @@ class _Base(object):
             raise AuthorizerError("can't assign password to anonymous user")
         if not self.has_user(username):
             raise AuthorizerError('no such user %s' % username)
-        if homedir is not None and not isinstance(homedir, unicode):
+        if homedir is not None and not isinstance(homedir, str):
             homedir = homedir.decode('utf8')
 
         if username in self._dummy_authorizer.user_table:
@@ -648,7 +648,7 @@ except ImportError:
     pass
 else:
     if sys.version_info < (3, 0):
-        import _winreg as winreg
+        import winreg as winreg
     else:
         import winreg
 
@@ -719,7 +719,7 @@ else:
                     "No profile directory defined for user %s" % username)
             value = winreg.QueryValueEx(key, "ProfileImagePath")[0]
             home = win32api.ExpandEnvironmentStrings(value)
-            if not PY3 and not isinstance(home, unicode):
+            if not PY3 and not isinstance(home, str):
                 home = home.decode('utf8')
             return home
 
@@ -876,6 +876,6 @@ else:
                 home = overridden_home
             else:
                 home = BaseWindowsAuthorizer.get_home_dir(self, username)
-            if not PY3 and not isinstance(home, unicode):
+            if not PY3 and not isinstance(home, str):
                 home = home.decode('utf8')
             return home

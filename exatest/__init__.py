@@ -29,8 +29,8 @@ def os_timer():
         yield
     finally:
         after = os.times()
-        print '\nreal %7.2fs\nuser %7.2fs\nsys  %7.2fs\n' % (
-            after[4] - before[4], after[0] - before[0], after[1] - before[1])
+        print(('\nreal %7.2fs\nuser %7.2fs\nsys  %7.2fs\n' % (
+            after[4] - before[4], after[0] - before[0], after[1] - before[1])))
 
 @contextlib.contextmanager
 def timer():
@@ -58,7 +58,7 @@ class TestLoader(unittest.TestLoader):
                 prefix=self.testMethodPrefix):
             return (attrname.startswith(prefix) and
                     hasattr(getattr(testCaseClass, attrname), '__call__'))
-        testFnNames = filter(isTestMethod, dir(testCaseClass))
+        testFnNames = list(filter(isTestMethod, dir(testCaseClass)))
         return sorted(testFnNames, key=lambda x: get_sort_key(getattr(testCaseClass, x)))
 
     def loadTestsFromModule(self, module, use_load_tests=True):
@@ -77,7 +77,7 @@ class TestLoader(unittest.TestLoader):
         if use_load_tests and load_tests is not None:
             try:
                 return load_tests(self, tests, None)
-            except Exception, e:
+            except Exception as e:
                 return unittest._make_failed_load_tests(module.__name__, e,
                                                self.suiteClass)
         return tests
@@ -133,6 +133,14 @@ class TestProgram(object):
         root.addHandler(console)
         root.setLevel(logging.DEBUG)
 
+    def validate_driver_path(self, parser: argparse.ArgumentParser, arg: str):
+        import os.path
+        absolute = os.path.abspath(os.path.expanduser(arg))
+        if not os.path.exists(absolute):
+            parser.error(f"The driver path '{absolute}' does not exist")
+        else:
+            return absolute
+
     def _parse_opts(self):
         desc = self.__doc__
         epilog = ''
@@ -152,7 +160,8 @@ class TestProgram(object):
         odbc.add_argument('--user', help='connection user', nargs="?", type=str, default="sys")
         odbc.add_argument('--password', help='connection password', nargs="?", type=str, default="exasol")
         odbc.add_argument('--driver',
-            help='path to ODBC driver (default: %(default)s)')
+                          help='path to ODBC driver (default: %(default)s)',
+                          type=lambda x: self.validate_driver_path(parser, x))
         odbcloglevel = ('off', 'error', 'normal', 'verbose')
         odbc.add_argument('--odbc-log', choices=odbcloglevel,
             help='activate ODBC driver log (default: %(default)s)')

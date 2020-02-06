@@ -1,12 +1,6 @@
 
-import functools
-import logging
-import os
 import re
-import sys
-import unittest
-
-import pyodbc
+from collections import defaultdict
 
 import exatest
 from exatest import *
@@ -43,19 +37,6 @@ def requires(req):
             if req not in capabilities:
                 raise exatest.SkipTest('requires: %s' % req) 
             return func(*args)
-        wrapper._sort_key = exatest.get_sort_key(func)
-        return wrapper
-    return dec
-
-def expectedFailureIfLang(lang):
-    '''Expect test to fail if lang is opts.lang'''
-    def dec(func):
-        @functools.wraps(func)
-        def wrapper(*args):
-            if lang == opts.lang:
-                return unittest.expectedFailure(func)(*args)
-            else:
-                return func(*args)
         wrapper._sort_key = exatest.get_sort_key(func)
         return wrapper
     return dec
@@ -189,18 +170,38 @@ def _rewrite_redirector(sql, redirector):
 
 def _split_file_on_slash(path):
     sql = ''
-    for line in open(path):
-        line = line.decode('utf8')
-        if line == '/\n':
-            if sql:
-                yield sql
-            sql = ''
-        else:
-            sql += line
-    if sql:
-        yield sql
+    with open(path, 'r') as f:
+        for line in f:
+            if line == '/\n':
+                if sql:
+                    yield sql
+                sql = ''
+            else:
+                sql += line
+        if sql:
+            yield sql
+
+
+expectedFailuresForLangsDict = defaultdict(list)
+
 
 class TestCase(exatest.TestCase):
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        for method in expectedFailuresForLangsDict[opts.lang]:
+            setattr(cls, method.__name__, unittest.expectedFailure(method))
+
+    @staticmethod
+    def expectedFailureIfLang(lang):
+        """ Expect test to fail if lang is opts.lang. This requires the setUpClass method of udf.TestCase to be run."""
+
+        def dec(func):
+            expectedFailuresForLangsDict[lang].append(func)
+            return func
+
+        return dec
+
     def query(self, *args, **kwargs):
         new_args = list(args)
         new_args[0] = _rewrite_redirector(new_args[0], opts.redirector_url)

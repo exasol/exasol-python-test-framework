@@ -1,15 +1,15 @@
 '''Test unittest extensions with unittest'''
 
-import cStringIO as StringIO
+import io as StringIO
 import contextlib
 import sys
 import unittest
 
 
 def _print_output(output):
-    print >> sys.stderr, '\n', '>' * 70
-    print >> sys.stderr, output
-    print >> sys.stderr, '<' * 70
+    print('\n', '>' * 70, file=sys.stderr)
+    print(output, file=sys.stderr)
+    print('<' * 70, file=sys.stderr)
 
 @contextlib.contextmanager
 def selftest(module, debug=False):

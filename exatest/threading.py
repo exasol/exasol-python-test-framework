@@ -1,17 +1,15 @@
-# absolute_import is a mandatory feature in 2.7, but without this line, it does not work:
-
-from __future__ import absolute_import 
-
 import sys
 import threading
 
-
 __all__ = ['Thread', 'ThreadAliveError']
 
-class ThreadAliveError(Exception): pass
+
+class ThreadAliveError(Exception):
+    pass
+
 
 class Thread(threading.Thread):
-    '''Replacement of threading.Thread for use in TestCase.
+    """Replacement of threading.Thread for use in TestCase.
 
     When join'ed, exceptions and assertion are collected.
 
@@ -29,7 +27,7 @@ class Thread(threading.Thread):
                 # do something
                 t.shutdown() # optional
                 t.join(5) # required to collect assertions
-    '''
+    """
 
     def __init__(self, *args, **kwargs):
         super(Thread, self).__init__(*args, **kwargs)
@@ -45,12 +43,12 @@ class Thread(threading.Thread):
 
     def join(self, timeout=None):
         super(Thread, self).join(timeout)
-        #if self.is_alive():
+        # if self.is_alive():
         #    raise ThreadAliveError("thread '%s' is alive" % self.name)
         if self.__exc_info is not None:
             cls, msg, tb = self.__exc_info
             self.__exc_info = None
-            raise cls("in thread '%s': %s" % (self.name, msg)), None, tb
+            raise cls("in thread '%s': %s" % (self.name, msg)).with_traceback(tb)
 
     def shutdown(self):
         self.__shutdown_event.set()
