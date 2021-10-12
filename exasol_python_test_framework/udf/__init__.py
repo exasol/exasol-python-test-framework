@@ -1,17 +1,11 @@
-
-import functools
-import logging
-import os
 import re
-import sys
-import unittest
 
 import pyodbc
 
-import exatest
-from exatest import *
+from exasol_python_test_framework import exatest
+from exasol_python_test_framework.exatest import *
 
-from exatest.clients.odbc import ODBCClient
+from exasol_python_test_framework.exatest.clients.odbc import ODBCClient
 
 capabilities = []
 opts = None

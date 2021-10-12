@@ -4,11 +4,9 @@ import SimpleHTTPServer
 import SocketServer
 import asyncore
 import collections
-import os
 import select
 import smtpd
 import socket
-import sys
 import threading
 
 from ..threading import Thread
@@ -130,7 +128,6 @@ class HTTPServer(BaseSimpleServer):
 class FTPServer(BaseSimpleServer):
     def __init__(self, documentroot='.', authorizer=None):
         global ftpserver
-        from . import servers
         from . import authorizers
         super(FTPServer, self).__init__()
         self.documentroot = documentroot
