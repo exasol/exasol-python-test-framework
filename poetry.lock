@@ -1,0 +1,17 @@
+[[package]]
+name = "pyodbc"
+version = "2.1.1"
+description = "DB API Module for ODBC"
+category = "main"
+optional = false
+python-versions = "*"
+
+[metadata]
+lock-version = "1.1"
+python-versions = ">=2.7"
+content-hash = "9b253be77989008d052095c3af014600ae4be2d71592f1e41fc1099e4a671976"
+
+[metadata.files]
+pyodbc = [
+    {file = "pyodbc-2.1.1.zip", hash = "sha256:8542a064ec8322e1ea9ba6e6bd14437bf45eb72551c8fcad0817ceda57824e2c"},
+]

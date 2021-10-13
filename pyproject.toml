@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "exasol-python-test-framework"
+version = "0.1.0"
+description = "Python Test framework for Exasol database tests"
+
+license = "MIT"
+
+authors = [
+    "Thomas Uebensee <ext.Thomas.Uebensee@exasol.com>",
+    "Torsten Kilias <torsten.kilias@exasol.com>"
+]
+
+readme = 'README.md'  # Markdown files are supported
+
+repository = "https://github.com/exasol/exasol-python-test-framework"
+homepage = "https://github.com/exasol/exasol-python-test-framework"
+
+include = ["exatest","udf"]
+keywords = ['exasol', 'testing']
+
+
+[tool.poetry.dependencies]
+python = ">=2.7"
+pyodbc = "=2.1.1"
