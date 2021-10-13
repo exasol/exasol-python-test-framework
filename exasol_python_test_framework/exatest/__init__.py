@@ -1,3 +1,5 @@
+import types
+
 import argparse
 import contextlib
 import cProfile
@@ -14,7 +16,9 @@ import socket
 
 from unittest import (
         SkipTest,
-        suite
+        suite,
+        case,
+        util
         )
 
 import pyodbc
@@ -29,8 +33,8 @@ def os_timer():
         yield
     finally:
         after = os.times()
-        print '\nreal %7.2fs\nuser %7.2fs\nsys  %7.2fs\n' % (
-            after[4] - before[4], after[0] - before[0], after[1] - before[1])
+        print(('\nreal %7.2fs\nuser %7.2fs\nsys  %7.2fs\n' % (
+            after[4] - before[4], after[0] - before[0], after[1] - before[1])))
 
 @contextlib.contextmanager
 def timer():
@@ -58,7 +62,7 @@ class TestLoader(unittest.TestLoader):
                 prefix=self.testMethodPrefix):
             return (attrname.startswith(prefix) and
                     hasattr(getattr(testCaseClass, attrname), '__call__'))
-        testFnNames = filter(isTestMethod, dir(testCaseClass))
+        testFnNames = list(filter(isTestMethod, dir(testCaseClass)))
         return sorted(testFnNames, key=lambda x: get_sort_key(getattr(testCaseClass, x)))
 
     def loadTestsFromModule(self, module, use_load_tests=True):
@@ -68,8 +72,11 @@ class TestLoader(unittest.TestLoader):
         for name in dir(module):
             obj = getattr(module, name)
             if isinstance(obj, type) and issubclass(obj, TestCase):
-                objects.append((inspect.getsourcelines(obj)[1], obj))
-        for _, obj in sorted(objects):
+                # Sort by line number and break ties with the class name.
+                objects.append((inspect.getsourcelines(obj)[1], obj.__name__, obj))
+        # This breaks if you define two classes with the same name on the same line numbers and try to run both at
+        # the same time. Please don't do this :)
+        for _, _, obj in sorted(objects):
             tests.append(self.loadTestsFromTestCase(obj))
 
         load_tests = getattr(module, 'load_tests', None)
@@ -77,7 +84,7 @@ class TestLoader(unittest.TestLoader):
         if use_load_tests and load_tests is not None:
             try:
                 return load_tests(self, tests, None)
-            except Exception, e:
+            except Exception as e:
                 return unittest._make_failed_load_tests(module.__name__, e,
                                                self.suiteClass)
         return tests
@@ -100,6 +107,82 @@ class TestLoader(unittest.TestLoader):
         loaded_suite = self.suiteClass(test_cases)
 
         return loaded_suite 
+
+    def loadTestsFromName(self, name, module=None):
+        """Return a suite of all test cases given a string specifier.
+        The name may resolve either to a module, a test case class, a
+        test method within a test case class, or a callable object which
+        returns a TestCase or TestSuite instance.
+        The method optionally resolves the names relative to a given module.
+        """
+        parts = name.split('.')
+        error_case, error_message = None, None
+        if module is None:
+            parts_copy = parts[:]
+            while parts_copy:
+                try:
+                    module_name = '.'.join(parts_copy)
+                    module = __import__(module_name)
+                    break
+                except ImportError:
+                    next_attribute = parts_copy.pop()
+                    # Last error so we can give it to the user if needed.
+                    error_case, error_message = _make_failed_import_test(
+                        next_attribute, self.suiteClass)
+                    if not parts_copy:
+                        # Even the top level import failed: report that error.
+                        self.errors.append(error_message)
+                        return error_case
+            parts = parts[1:]
+        obj = module
+        for part in parts:
+            try:
+                parent, obj = obj, getattr(obj, part)
+            except AttributeError as e:
+                # We can't traverse some part of the name.
+                if (getattr(obj, '__path__', None) is not None
+                    and error_case is not None):
+                    # This is a package (no __path__ per importlib docs), and we
+                    # encountered an error importing something. We cannot tell
+                    # the difference between package.WrongNameTestClass and
+                    # package.wrong_module_name so we just report the
+                    # ImportError - it is more informative.
+                    self.errors.append(error_message)
+                    return error_case
+                else:
+                    # Otherwise, we signal that an AttributeError has occurred.
+                    error_case, error_message = _make_failed_test(
+                        part, e, self.suiteClass,
+                        'Failed to access attribute:\n%s' % (
+                            traceback.format_exc(),))
+                    self.errors.append(error_message)
+                    return error_case
+
+        if isinstance(obj, types.ModuleType):
+            return self.loadTestsFromModule(obj)
+        elif isinstance(obj, type) and issubclass(obj, case.TestCase):
+            return self.loadTestsFromTestCase(obj)
+        elif (isinstance(obj, types.FunctionType) and
+              isinstance(parent, type) and
+              issubclass(parent, case.TestCase)):
+            name = parts[-1]
+            inst = parent(name,**self.kwargs)
+            # static methods follow a different path
+            if not isinstance(getattr(inst, name), types.FunctionType):
+                return self.suiteClass([inst])
+        elif isinstance(obj, suite.TestSuite):
+            return obj
+        if callable(obj):
+            test = obj(**self.kwargs)
+            if isinstance(test, suite.TestSuite):
+                return test
+            elif isinstance(test, case.TestCase):
+                return self.suiteClass([test])
+            else:
+                raise TypeError("calling %s returned %s, not a test" %
+                                (obj, test))
+        else:
+            raise TypeError("don't know how to make test from: %s" % obj)
 
 class TestProgram(object):
     logger_name = 'exatest.main'
@@ -133,6 +216,21 @@ class TestProgram(object):
         root.addHandler(console)
         root.setLevel(logging.DEBUG)
 
+    def validate_driver_path(self, parser: argparse.ArgumentParser, arg: str):
+        if not arg:
+            raise argparse.ArgumentTypeError("The driver path is empty!")
+        import os.path
+        absolute = os.path.abspath(os.path.expanduser(arg))
+        if not os.path.exists(absolute):
+            raise argparse.ArgumentTypeError(f"The driver path '{absolute}' does not exist!")
+        else:
+            return absolute
+
+    def validate_server(self, parser: argparse.ArgumentParser, arg: str):
+        if not arg:
+            raise argparse.ArgumentTypeError("The connection string is empty!")
+        return arg
+
     def _parse_opts(self):
         desc = self.__doc__
         epilog = ''
@@ -148,11 +246,16 @@ class TestProgram(object):
             help='classes or methods to run in the form "TestCaseClass" or "TestCaseClass.test_method" (default: run all tests)')
 
         odbc = parser.add_argument_group('ODBC specific')
-        odbc.add_argument('--server', help='connection string')
+        odbc.add_argument('--server',
+                          help='connection string',
+                          required=True,
+                          type=lambda x: self.validate_server(parser, x))
         odbc.add_argument('--user', help='connection user', nargs="?", type=str, default="sys")
         odbc.add_argument('--password', help='connection password', nargs="?", type=str, default="exasol")
         odbc.add_argument('--driver',
-            help='path to ODBC driver (default: %(default)s)')
+                          help='path to ODBC driver',
+                          required=True,
+                          type=lambda x: self.validate_driver_path(parser, x))
         odbcloglevel = ('off', 'error', 'normal', 'verbose')
         odbc.add_argument('--odbc-log', choices=odbcloglevel,
             help='activate ODBC driver log (default: %(default)s)')
@@ -167,10 +270,6 @@ class TestProgram(object):
             help='run program with profiler')
         debug.add_argument('--lint', action='store_true',
             help='static code checker (PyLint)')
-        if os.path.exists('/usr/opt/testsystem'):
-            driver_path = '/usr/opt/testsystem/EXASolution_ODBC/odbc_sles11_x86_64/lib64/libexaodbc-uo2212.so'
-        else:
-            driver_path = '/opt/local/testsystem/EXASolution_ODBC/odbc_sles11_x86_64/lib64/libexaodbc-uo2212.so'
         parser.set_defaults(
                 verbosity=1,
                 failfast=False,
@@ -178,10 +277,7 @@ class TestProgram(object):
                 loglevel='warning',
                 odbc_log='off',
                 connect=None,
-                #driver=os.path.realpath(os.path.join(
-                #        os.path.abspath(__file__),
-                #        '../../../../../lib/libexaodbc-uo2214.so')),
-                driver=driver_path,
+                driver=None,
                 debugger=False,
                 profiler=False,
                 lint=False,
@@ -238,8 +334,7 @@ class TestProgram(object):
 
     def _write_odbcini(self):
         name = os.path.realpath(os.path.join(self.opts.logdir, 'odbc.ini'))
-        # we have to resolve the hostname to ipv4 ourselve, because pyodbc sometimes resolve hostnames to ipv6 which is not supported by Exasol
-        server=self._resolve_host_to_ipv4(self.opts.server)
+        server=socket.getfqdn(self.opts.server)
         with open(name, 'w') as tmp:
             tmp.write('[ODBC Data Sources]\n')
             tmp.write('%s=EXASolution\n'%self.dsn)
@@ -262,9 +357,8 @@ class TestProgram(object):
 
     def _resolve_host_to_ipv4(self,server):
         host_port_split=server.split(":")
-        ip_of_host = socket.gethostbyname(self.opts.server.split(":")[0])
-        ip_with_port = ip_of_host+":"+host_port_split[1]
-        return ip_with_port
+        host_port_split[0] = socket.gethostbyname(host_port_split[0])
+        return ":".join(host_port_split)
 
     def _lint(self):
         env = os.environ.copy()

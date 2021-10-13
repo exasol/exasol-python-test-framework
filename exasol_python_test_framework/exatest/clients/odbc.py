@@ -1,8 +1,24 @@
 import sys
 import pyodbc
 
+# Check the pyodbc version
+try:
+    major, minor, patch = map(int, pyodbc.version.split('.'))
+    if major != 4 or (minor, patch) < (0, 27):
+        raise ImportError('pyodbc version >= 4.0.27 required. Try running `pip3 install --user --force pyodbc`.')
+except ValueError:  # The version number is not a number...
+    raise ImportError('pyodbc version >= 4.0.27 required. Try running `pip3 install --user --force pyodbc`.')
+
+
 class ClientError(Exception):
     pass
+
+def getScriptLanguagesFromArgs():
+    for i, arg in enumerate(sys.argv):
+        if arg == '--script-languages':
+            if len(sys.argv) == i + 1:
+                raise ClientError('Value for --script-languages missing')
+            return sys.argv[i + 1]
 
 class ODBCClient(object):
     def __init__(self, dsn, user="sys", password="exasol"):
@@ -15,9 +31,8 @@ class ODBCClient(object):
     def connect(self, **kwargs):
         params = self.params.copy()
         params.update(kwargs)
-        self.conn = pyodbc.connect(**params)
-        self.conn.setencoding(str, encoding='utf-8') 
-        self.conn.setencoding(unicode, encoding='utf-8') 
+        self.conn = pyodbc.connect(**params, ansi=True)
+        self.conn.setencoding(encoding='utf-8')
         self.cursor = self.conn.cursor()
         self._setScriptLanguagesFromArgs()
 
@@ -26,7 +41,8 @@ class ODBCClient(object):
             if arg == '--script-languages':
                 if len(sys.argv) == i + 1:
                     raise ClientError('Value for --script-languages missing')
-                self.query("ALTER SESSION SET SCRIPT_LANGUAGES='%s'" % sys.argv[i + 1])
+                langs=getScriptLanguagesFromArgs()
+                self.query("ALTER SESSION SET SCRIPT_LANGUAGES='%s'" % langs)
                 break
 
     def query(self, qtext, *args):

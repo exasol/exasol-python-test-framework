@@ -37,7 +37,7 @@ from ._compat import b
 from ._compat import getcwdu
 from ._compat import PY3
 from ._compat import u
-from ._compat import unicode
+from ._compat import str
 from ._compat import xrange
 from .authorizers import AuthenticationFailed
 from .authorizers import AuthorizerError
@@ -1059,7 +1059,7 @@ class BufferedIteratorProducer(object):
         its next() method different times.
         """
         buffer = []
-        for x in xrange(self.loops):
+        for x in range(self.loops):
             try:
                 buffer.append(next(self.iterator))
             except StopIteration:
@@ -1314,7 +1314,7 @@ class FTPHandler(AsyncChat):
                 info['bytes-trans'] = dc.get_transmitted_bytes()
         info.update(extra_info)
         if as_str:
-            return ', '.join(['%s=%r' % (k, v) for (k, v) in info.items()])
+            return ', '.join(['%s=%r' % (k, v) for (k, v) in list(info.items())])
         return info
 
     def __repr__(self):
@@ -2179,8 +2179,8 @@ class FTPHandler(AsyncChat):
                     # http://bugs.python.org/issue683592
                     ls = []
                     for x in listing:
-                        if not isinstance(x, unicode):
-                            x = unicode(x, 'utf8')
+                        if not isinstance(x, str):
+                            x = str(x, 'utf8')
                         ls.append(x)
                     listing = sorted(ls)
                 data = '\r\n'.join(listing) + '\r\n'
@@ -2519,7 +2519,7 @@ class FTPHandler(AsyncChat):
         self.username = ""
 
     def handle_auth_success(self, home, password, msg_login):
-        if not isinstance(home, unicode):
+        if not isinstance(home, str):
             if PY3:
                 raise TypeError('type(home) != text')
             else:
@@ -2582,7 +2582,7 @@ class FTPHandler(AsyncChat):
         # name and in case it contains embedded double-quotes
         # they must be doubled (see RFC-959, chapter 7, appendix 2).
         cwd = self.fs.cwd
-        assert isinstance(cwd, unicode), cwd
+        assert isinstance(cwd, str), cwd
         self.respond('257 "%s" is the current directory.'
                      % cwd.replace('"', '""'))
 
@@ -2605,7 +2605,7 @@ class FTPHandler(AsyncChat):
             self.respond('550 %s.' % why)
         else:
             cwd = self.fs.cwd
-            assert isinstance(cwd, unicode), cwd
+            assert isinstance(cwd, str), cwd
             self.respond('250 "%s" is the current directory.' % cwd)
             if getcwdu() != init_cwd:
                 os.chdir(init_cwd)
@@ -3005,7 +3005,7 @@ class FTPHandler(AsyncChat):
             # provide a compact list of recognized commands
             def formatted_help():
                 cmds = []
-                keys = sorted([x for x in self.proto_cmds.keys()
+                keys = sorted([x for x in list(self.proto_cmds.keys())
                                if not x.startswith('SITE ')])
                 while keys:
                     elems = tuple((keys[0:8]))

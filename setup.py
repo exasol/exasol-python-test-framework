@@ -15,7 +15,7 @@ package_data = \
 {'': ['*']}
 
 install_requires = \
-['numpy', 'pyodbc', 'scipy']
+['docker>=5.0.3', 'numpy==1.19.5', 'pyodbc>=4.0.27', 'scipy==1.2.1']
 
 setup_kwargs = {
     'name': 'exasol-python-test-framework',
@@ -30,7 +30,7 @@ setup_kwargs = {
     'packages': packages,
     'package_data': package_data,
     'install_requires': install_requires,
-    'python_requires': '>=2.7',
+    'python_requires': '>=3.6',
 }
 
 

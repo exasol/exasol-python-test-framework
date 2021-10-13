@@ -1,11 +1,15 @@
+import csv
+import subprocess
+from datetime import date
+from datetime import datetime
+from decimal import Decimal
+import math
 import re
-
-import pyodbc
 
 from exasol_python_test_framework import exatest
 from exasol_python_test_framework.exatest import *
 
-from exasol_python_test_framework.exatest.clients.odbc import ODBCClient
+from exasol_python_test_framework.exatest.clients.odbc import ODBCClient, getScriptLanguagesFromArgs
 
 capabilities = []
 opts = None
@@ -40,6 +44,21 @@ def requires(req):
         wrapper._sort_key = exatest.get_sort_key(func)
         return wrapper
     return dec
+
+def get_supported_languages():
+    result_lang = []
+    #First we prepare a regular expression to get the first language (re.match() returns only the occurence matching from start of string)
+    languages_from_args = getScriptLanguagesFromArgs()
+    r = re.compile(r"(\w+)=")
+    first_lang = r.match(languages_from_args)
+    if first_lang:
+        result_lang.append(first_lang.group(1))
+    #And now we get the rest. All other languages must start with a whitespace and endwith the equal sign, we can take leverage of that in the regex.
+    r = re.compile(r"\s(\w+)=")
+    #re.findall is very handy here: It returns the list of the groups for each match. as we have only one group (\w+) it returns a flat list with the result.
+    result_lang.extend(r.findall(languages_from_args))
+    return result_lang
+
 
 def expectedFailureIfLang(lang):
     '''Expect test to fail if lang is opts.lang'''
@@ -110,6 +129,7 @@ class TestProgram(exatest.TestProgram):
                 is_compat_mode=None,
                 script_languages=None,
                 )
+
 
     def prepare_hook(self):
         global opts
@@ -200,7 +220,163 @@ class TestCase(exatest.TestCase):
         new_args[0] = _rewrite_redirector(new_args[0], opts.redirector_url)
         return super(TestCase, self).query(*new_args, **kwargs)
 
+    def query_via_exaplus(self, query):
+        cmd = '''%(exaplus)s -c %(conn)s -u %(user)s -P %(password)s
+                        -no-config -autocommit ON -L -pipe''' % {
+                                'exaplus': os.environ.get('EXAPLUS'),
+                                'conn': opts.server,
+                                'user': self.user,
+                                'password': self.password,
+                                }
+        print(f'Running the following exaplus command {cmd}')
+        env = os.environ.copy()
+        env['LC_ALL'] = 'en_US.UTF-8'
+        exaplus = subprocess.Popen(
+                    cmd.split(), 
+                    env=env, 
+                    stdin=subprocess.PIPE, 
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE)
+        langs=getScriptLanguagesFromArgs()
+        query = "ALTER SESSION SET SCRIPT_LANGUAGES='%s';" % langs + "\n" + query
+        print(f'Executing SQL in exaplus: {query}')
+        out, err = exaplus.communicate(query.encode('utf8'))
+        return out, err
     
+    def import_via_exaplus(self, table_name, table_generator, prepare_sql):
+        tmpdir = tempfile.mkdtemp()
+        fifo_filename = os.path.join(tmpdir, 'myfifo')
+        import_table_sql = '''IMPORT INTO %s FROM LOCAL CSV FILE '%s';'''%(table_name,fifo_filename)
+        try:
+            os.mkfifo(fifo_filename)
+            write_trhead = threading.Thread(target=self._write_into_fifo, args=(fifo_filename, table_generator))
+            write_trhead.start()
+            sql=prepare_sql+"\n"+import_table_sql+"\n"+"commit;"
+            out,err=self.query_via_exaplus(sql)
+            print(out)
+            print(err)
+            write_trhead.join()
+        finally:
+            os.remove(fifo_filename)
+            os.rmdir(tmpdir)
+
+    def _write_into_fifo(self, fifo_filename, table_generator):
+        with open(fifo_filename,"w") as f:
+            csvwriter = csv.writer(f, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            for row in table_generator:
+                csvwriter.writerow(row)
+
+    def import_via_insert(self, table_name, table_generator, column_names=None, tuples_per_insert=1000):
+        if column_names is not None:
+            column_names_str = ','.join(column_names)
+        else:
+            column_names_str = ''
+        rows = []
+        for i, row in enumerate(table_generator):
+            values = ','.join(self._convert_insert_value(value) for value in row)
+            row_str = "(%s)" % (values)
+            rows.append(row_str)
+            if i % tuples_per_insert == 0 and i > 0:
+                self.run_insert(table_name,column_names_str,rows)
+                del rows_str
+                rows = []
+        self.run_insert(table_name,column_names_str,rows)
+
+
+    def run_insert(self, table_name, column_names_str, rows):
+        if len(rows)>0:
+            rows_str = ','.join(rows)
+            if column_names_str != "":
+                sql = "INSERT INTO %s (%s) VALUES %s" % (table_name, column_names_str, rows_str)
+            else:
+                sql = "INSERT INTO %s VALUES %s" % (table_name, rows_str)
+
+            print('Executing insert statement {sql}')
+            self.query(sql)
+
+    def _convert_insert_value(self, value):
+        if isinstance(value,str):
+            return "'%s'" % value
+        elif isinstance(value,(int,float)):
+            return str(value)
+        elif isinstance(value,bool):
+            return "TRUE" if value else "FALSE"
+        elif isinstance(value,Decimal):
+            return str(value)
+        elif isinstance(value,(date,datetime)):
+            return "'%s'"%str(value)
+        elif value is None:
+            return "NULL"
+        else:
+            raise TypeError("Type %s of value %s is not supported" % (type(value), value))
+
+
+    def create_table_by_amplifying_data_linear(
+            self, 
+            source_table_name, destination_table_name, 
+            multiplier, max_unions=10):
+        self.query("CREATE OR REPLACE TABLE {destination_table_name} like {source_table_name}"\
+                .format(
+                    destination_table_name=destination_table_name,
+                    source_table_name=source_table_name))
+        for i in range(int(math.floor(multiplier/max_unions))):
+            self.generate_insert_via_union(
+                source_table_name, destination_table_name,max_unions)
+        if multiplier % max_unions > 0:
+            self.generate_insert_via_union(
+                source_table_name, destination_table_name,multiplier % max_unions)
+
+    def generate_insert_via_union(self, source_table_name, destination_table_name, multiplier):
+        select_queries = ['''select * from {soruce_table_name}'''\
+                                .format(soruce_table_name=source_table_name)
+                            for i in range(multiplier)]
+        union_query = " union all ".join(select_queries)
+        self.query('''INSERT INTO {destination_table_name} {union_query};'''\
+                .format(
+                    destination_table_name=destination_table_name,
+                    union_query=union_query))
+
+
+    def create_table_by_amplifying_data_exponential(
+            self,
+            source_table_name, destination_table_name,
+            exponent, base=10):
+        """Amplifies the data in source_table_name by count(source_table)*base**exponent"""
+        self.query(fixindent(
+                """
+                CREATE OR REPLACE TABLE {destination_table_name} as 
+                SELECT * from {source_table_name}
+                """\
+                .format(
+                    destination_table_name=destination_table_name,
+                    source_table_name=source_table_name
+                    )))
+        select_queries = ['''select * from {destination_table_name}'''\
+                .format(destination_table_name=destination_table_name) 
+                            for i in range(base)]
+        union_query = " union all ".join(select_queries)
+        for i in range(exponent):
+            self.query('''INSERT INTO {destination_table_name} {union_query};'''\
+                        .format(
+                            destination_table_name=destination_table_name, 
+                            union_query=union_query))
+
+    # def compare_performance_against_standard_container(
+    #         self, runs, warmup, max_deviation, query):
+    #     connection = self.getConnection(self.user,self.password)
+    #     under_test_mean_elapsed_time,under_test_variance_elapsed_time,\
+    #     under_test_max_elapsed_time,under_test_min_elapsed_time=\
+    #                 self.run_queries(connection,"under_test", runs, warmup, query)
+    #     connection.close()
+
+    #     connection = self.getConnection(self.user,self.password)
+    #     connection.query("ALTER SESSION SET script_languages='PYTHON=builtin_python PYTHON3=builtin_python3 JAVA=builtin_java R=builtin_r'")
+    #     builtin_mean_elapsed_time,builtin_variance_elapsed_time,\
+    #     builtin_max_elapsed_time,builtin_min_elapsed_time=\
+    #             self.run_queries(connection,"builtin_python", runs, warmup, query)
+    #     connection.close()
+
+    #     deviation = 100-builtin_mean_elapsed_time/under_test_mean_elapsed_time*100
 
 # vim: ts=4:sts=4:sw=4:et:fdm=indent
 

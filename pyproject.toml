@@ -20,7 +20,8 @@ keywords = ['exasol', 'testing']
 
 
 [tool.poetry.dependencies]
-python = ">=2.7"
-pyodbc = "*"
-numpy = "*"
-scipy = "*"
+python = ">=3.6"
+pyodbc = ">=4.0.27"
+numpy = "1.19.5"
+scipy = "1.2.1"
+docker = ">=5.0.3"
