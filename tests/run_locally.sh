@@ -26,13 +26,11 @@ eval set -- "$optarr"
 while true; do
     case "$1" in
         --server) server="$2"; shift 2;;
-	--exatest-folder) test_folder="$2"; shift 2;;
         --odbc-driver) odbc_driver="$2"; shift 2;;
         --) shift; break;;
         *) echo "Usage: $0"
 		       echo "Options:"
 		       echo "  [--server=<host:port>]                Address of Exasol database instance"
-		       echo "  [--test-folder=<path>]                Path to test files"
 		       echo "  [--odbc-driver=<path>]                     Path to ODBC driver"
 		       echo "  [-h|--help]                           Print this help."
            echo "Environment variable EXAPLUS must point to exaplus executable."; exit 0;;
