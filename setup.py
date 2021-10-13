@@ -3,17 +3,19 @@ from setuptools import setup
 
 packages = \
 ['exasol_python_test_framework',
+ 'exasol_python_test_framework.docker_db_environment',
  'exasol_python_test_framework.exatest',
  'exasol_python_test_framework.exatest.clients',
  'exasol_python_test_framework.exatest.servers',
  'exasol_python_test_framework.exatest.test',
+ 'exasol_python_test_framework.performance',
  'exasol_python_test_framework.udf']
 
 package_data = \
 {'': ['*']}
 
 install_requires = \
-['pyodbc==2.1.1']
+['numpy', 'pyodbc', 'scipy']
 
 setup_kwargs = {
     'name': 'exasol-python-test-framework',
