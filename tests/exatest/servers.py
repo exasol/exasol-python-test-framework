@@ -9,12 +9,10 @@ import unittest
 import urllib.request, urllib.parse, urllib.error
 from email.mime.text import MIMEText
 
-sys.path.append(os.path.realpath(__file__ + '/../../../exasol_python_test_framework'))
+from exasol_python_test_framework.exatest.test import selftest
 
-from exatest.test import selftest
-
-import exatest
-from exatest.testcase import (
+from exasol_python_test_framework import exatest
+from exasol_python_test_framework.exatest.testcase import (
         useData,
         TestCase,
         ParameterizedTestCase,
@@ -24,9 +22,9 @@ from exatest.testcase import (
         expectedFailure,
         expectedFailureIf,
         )
-from exatest.utils import tempdir
-from exatest.servers import FTPServer, HTTPServer, SMTPServer
-from exatest.servers.authorizers import DummyAuthorizer
+from exasol_python_test_framework.exatest.utils import tempdir
+from exasol_python_test_framework.exatest.servers import FTPServer, HTTPServer, SMTPServer
+from exasol_python_test_framework.exatest.servers.authorizers import DummyAuthorizer
 
 class FTPServerTest(unittest.TestCase):
     def test_anonymous(self):

@@ -4,12 +4,10 @@ import unittest
 import os
 import sys
 
-sys.path.append(os.path.realpath(__file__ + '/../../../exasol_python_test_framework'))
+from exasol_python_test_framework.exatest.test import selftest
 
-from exatest.test import selftest
-
-import exatest
-from exatest.testcase import (
+from exasol_python_test_framework import exatest
+from exasol_python_test_framework.exatest.testcase import (
         useData,
         ParameterizedTestCase,
         get_sort_key,

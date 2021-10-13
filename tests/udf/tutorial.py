@@ -13,11 +13,7 @@ documentation applies here as well.
 import os
 import sys
 
-# Every exatest file must import udf; the "sys.path.append" line is used
-# to tell Python there to find udf:
-sys.path.append(os.path.realpath(__file__ + '/../../../exasol_python_test_framework'))
-
-import udf
+from exasol_python_test_framework import udf
 
 # Global setup and cleanup can be put in the following two functions:
 def setUpModule():

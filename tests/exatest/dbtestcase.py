@@ -3,11 +3,9 @@
 import os
 import sys
 
-sys.path.append(os.path.realpath(__file__ + '/../../../exasol_python_test_framework'))
-
-import exatest
-from exatest.utils import chdir
-from exatest import (
+from exasol_python_test_framework import exatest
+from exasol_python_test_framework.exatest.utils import chdir
+from exasol_python_test_framework.exatest import (
         useData,
         )
 

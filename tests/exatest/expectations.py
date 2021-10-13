@@ -5,12 +5,11 @@ import os
 import re
 import sys
 
-sys.path.append(os.path.realpath(__file__ + '/../../../exasol_python_test_framework'))
+from exasol_python_test_framework import exatest
 
-from exatest.test import selftest
+from exasol_python_test_framework.exatest.test import selftest
 
-import exatest
-from exatest.testcase import (
+from exasol_python_test_framework.exatest.testcase import (
         useData,
         skip,
         skipIf,
