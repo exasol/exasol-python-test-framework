@@ -6,8 +6,7 @@ description = "Python Test framework for Exasol database tests"
 license = "MIT"
 
 authors = [
-    "Thomas Uebensee <ext.Thomas.Uebensee@exasol.com>",
-    "Torsten Kilias <torsten.kilias@exasol.com>"
+    "Exasol Ag <opensource@exasol.com>"
 ]
 
 readme = 'README.md'  # Markdown files are supported
@@ -17,6 +16,8 @@ homepage = "https://github.com/exasol/exasol-python-test-framework"
 
 include = ["exatest","udf"]
 keywords = ['exasol', 'testing']
+
+exclude = ["lang"]
 
 
 [tool.poetry.dependencies]
