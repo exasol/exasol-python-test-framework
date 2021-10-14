@@ -136,7 +136,7 @@ class SMTPServerTest(unittest.TestCase):
                         buf3 = s.recv(4096)
                         s.close()
                     self.assertIn('220', buf1.decode("utf-8"))
-                    self.assertIn('250 HELP', buf2.decode("utf-8"))
+                    self.assertIn('250', buf2.decode("utf-8"))
         with selftest(Module) as result:
             self.assertTrue(result.wasSuccessful())
 
