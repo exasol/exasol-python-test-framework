@@ -1,21 +1,12 @@
 #!/usr/bin/env python3
 
 import unittest
-import os
 import re
-import sys
 
 from exasol_python_test_framework import exatest
 
-from exasol_python_test_framework.exatest.test import selftest
+from exasol_python_test_framework.exatest.test import selftest, run_selftest
 
-from exasol_python_test_framework.exatest.testcase import (
-        useData,
-        skip,
-        skipIf,
-        expectedFailure,
-        expectedFailureIf,
-        )
 
 class ExpectationsTestCaseTest(unittest.TestCase):
     def test_metatest(self):
@@ -23,7 +14,7 @@ class ExpectationsTestCaseTest(unittest.TestCase):
             class Test(exatest.TestCase):
                 def test_pass(self):
                     self.assertExpectations()
-            
+
                 def test_fail(self):
                     self._expectations.append('some traceback')
                     self.assertExpectations()
@@ -33,7 +24,7 @@ class ExpectationsTestCaseTest(unittest.TestCase):
             self.assertEqual(2, result.testsRun)
             self.assertIn('test_pass', result.output)
             self.assertIn('test_fail', result.output)
-    
+
 
     def test_getattr(self):
         class Module:
@@ -43,16 +34,17 @@ class ExpectationsTestCaseTest(unittest.TestCase):
 
                 def test_x(self):
                     self.expectFoo()
-        
+
         with selftest(Module) as result:
             self.assertIn('FOO', result.output)
+            self.assertIn('FAILED', result.output)
 
     def test_getattr_unknown_assert(self):
         class Module:
             class Test(exatest.TestCase):
                 def test_x(self):
                     self.expectFoo()
-        
+
         with selftest(Module) as result:
             self.assertIn("AttributeError: 'Test' object has no attribute 'expectFoo'", result.output)
 
@@ -61,10 +53,10 @@ class ExpectationsTestCaseTest(unittest.TestCase):
             class Test(exatest.TestCase):
                 def test_x(self):
                     self.expectTrue(False)
-                    self.assertEqual(1,2)
+                    self.assertEqual(1, 2)
 
         with selftest(Module) as result:
-            self.assertIn('False is not True', result.output)
+            self.assertIn('False is not true', result.output)
             self.assertIn('1 != 2', result.output)
 
     def test_assertExpectations(self):
@@ -73,20 +65,20 @@ class ExpectationsTestCaseTest(unittest.TestCase):
                 def test_x(self):
                     self.expectTrue(False)
                     self.assertExpectations()
-        
+
         with selftest(Module) as result:
             self.assertIn("ExpectationError", result.output)
-            self.assertNotIn("ERROR", result.output)
+            self.assertIn("FAILED", result.output)
 
     def test_missing_assertExpectations_results_in_error(self):
         class Module:
             class Test(exatest.TestCase):
                 def test_x(self):
                     self.expectTrue(False)
-        
+
         with selftest(Module) as result:
             self.assertIn("ExpectationError", result.output)
-            self.assertIn("ERROR", result.output)
+            self.assertIn("FAILED", result.output)
 
     def test_assertExpectations_contextmanager(self):
         class Module:
@@ -95,7 +87,7 @@ class ExpectationsTestCaseTest(unittest.TestCase):
                     with self.expectations():
                         self.expectTrue(False)
                     self.assertEqual(1,2)
-        
+
         with selftest(Module) as result:
             self.assertIn("ExpectationError", result.output)
             self.assertNotIn('1 != 2', result.output)
@@ -112,13 +104,10 @@ class ExpectationsTestCaseTest(unittest.TestCase):
                     self.second()
                 def test_x(self):
                     self.third()
-        
+
         with selftest(Module) as result:
             self.assertTrue(re.search('third.*second.*first', result.output, re.DOTALL))
 
 
-
 if __name__ == '__main__':
-    unittest.main()
-
-# vim: ts=4:sts=4:sw=4:et:fdm=indent
+    run_selftest()

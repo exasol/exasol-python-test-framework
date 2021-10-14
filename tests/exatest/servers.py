@@ -4,32 +4,23 @@ import ftplib
 import os
 import smtplib
 import socket
-import sys
 import unittest
 import urllib.request, urllib.parse, urllib.error
 from email.mime.text import MIMEText
 
-from exasol_python_test_framework.exatest.test import selftest
+from exasol_python_test_framework.exatest.test import selftest, run_selftest
 
 from exasol_python_test_framework import exatest
-from exasol_python_test_framework.exatest.testcase import (
-        useData,
-        TestCase,
-        ParameterizedTestCase,
-        get_sort_key,
-        skip,
-        skipIf,
-        expectedFailure,
-        expectedFailureIf,
-        )
+
 from exasol_python_test_framework.exatest.utils import tempdir
 from exasol_python_test_framework.exatest.servers import FTPServer, HTTPServer, SMTPServer
 from exasol_python_test_framework.exatest.servers.authorizers import DummyAuthorizer
 
+
 class FTPServerTest(unittest.TestCase):
     def test_anonymous(self):
         class Module:
-            class Test(unittest.TestCase):
+            class Test(exatest.TestCase):
                 def test_1(self):
                     with tempdir() as tmp:
                         with open(os.path.join(tmp, 'dummy'), 'w'):
@@ -47,7 +38,7 @@ class FTPServerTest(unittest.TestCase):
 
     def test_authenticated_user(self):
         class Module:
-            class Test(unittest.TestCase):
+            class Test(exatest.TestCase):
                 def test_1(self):
                     with tempdir() as tmp:
                         with open(os.path.join(tmp, 'dummy'), 'w'):
@@ -75,19 +66,19 @@ class FTPServerTest(unittest.TestCase):
                 self.assertEqual(cwd, os.getcwd())
             self.assertEqual(cwd, os.getcwd())
         self.assertEqual(cwd, os.getcwd())
-                
+
 
 class HTTPServerTest(unittest.TestCase):
     def test_anonymous(self):
         class Module:
-            class Test(unittest.TestCase):
+            class Test(exatest.TestCase):
                 def test_1(self):
                     with tempdir() as tmp:
                         with open(os.path.join(tmp, 'dummy'), 'w') as f:
                             f.write('babelfish')
                         with HTTPServer(tmp) as httpd:
-                            url = urllib.request.urlopen('http://%s:%d/dummy' % httpd.address)
-                            data = url.readlines()
+                            with urllib.request.urlopen('http://%s:%d/dummy' % httpd.address) as url:
+                                data = [line.decode("utf-8") for line in url.readlines()]
                     self.assertIn('babelfish', '\n'.join(data))
         with selftest(Module) as result:
             self.assertTrue(result.wasSuccessful())
@@ -104,11 +95,11 @@ class HTTPServerTest(unittest.TestCase):
             self.assertEqual(cwd, os.getcwd())
         self.assertEqual(cwd, os.getcwd())
 
-                
+
 class SMTPServerTest(unittest.TestCase):
     def test_simple_message(self):
         class Module:
-            class Test(unittest.TestCase):
+            class Test(exatest.TestCase):
                 def test_1(self):
                     with SMTPServer(debug=True) as smtpd:
                         host, port = smtpd.address
@@ -124,29 +115,31 @@ class SMTPServerTest(unittest.TestCase):
                     self.assertEqual(1, len(smtpd.messages))
                     self.assertEqual('from.address@foo.bar', smtpd.messages[0].sender)
                     self.assertIn('babel@fish.org', smtpd.messages[0].recipients)
-                    self.assertIn('Test mail', smtpd.messages[0].body)
+                    self.assertIn('Test mail', smtpd.messages[0].body.decode("utf-8"))
         with selftest(Module) as result:
             self.assertTrue(result.wasSuccessful())
 
-    def test_non_esmtp(self):
+    def test_esmtp(self):
+        """
+        Python3 supports ESMTP natively (while Python2 did not)
+        """
         class Module:
-            class Test(unittest.TestCase):
+            class Test(exatest.TestCase):
                 def test_1(self):
-                    with SMTPServer(esmtp=False, debug=True) as smtpd:
+                    with SMTPServer(debug=True) as smtpd:
                         host, port = smtpd.address
                         s = socket.create_connection(smtpd.address)
                         buf1 = s.recv(4096)
-                        s.send('EHLO some.host.com\r\n')
+                        s.send(b'EHLO some.host.com\r\n') #Send an ESMTP command
                         buf2 = s.recv(4096)
-                        s.send('QUIT\r\n')
+                        s.send(b'QUIT\r\n')
                         buf3 = s.recv(4096)
                         s.close()
-                    self.assertIn('220', buf1)
-                    self.assertIn('502 Error', buf2)
+                    self.assertIn('220', buf1.decode("utf-8"))
+                    self.assertIn('250 HELP', buf2.decode("utf-8"))
         with selftest(Module) as result:
             self.assertTrue(result.wasSuccessful())
 
-if __name__ == '__main__':
-    unittest.main()
 
-# vim: ts=4:sts=4:sw=4:et:fdm=indent
+if __name__ == '__main__':
+    run_selftest()

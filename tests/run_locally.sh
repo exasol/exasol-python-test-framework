@@ -5,8 +5,7 @@ set -u
 die() { echo "ERROR:" "$@" >&2; exit 1; }
 
 # $1: path to python exatest file
-# $2: exasol server address
-# $3...: additional arguments passed to tests
+# $2...: additional arguments passed to tests
 function run_test() {
   echo "Starting test: $1" 1>&2
   python3 "$@"
@@ -15,6 +14,15 @@ function run_test() {
       echo "FAILED: $1"
       exit 1
   fi
+}
+
+# $1: folder name
+# $2: exasol server address
+# $3: odbc_driver
+function run_tests_in_folder() {
+  for test_ in "$1"/*.py; do
+      run_test "$SCRIPT_DIR/exatest/dbtestcase.py" --server "$2" --driver "$3"
+  done
 }
 
 
@@ -47,9 +55,5 @@ fi
 
 
 SCRIPT_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
-
-run_test "$SCRIPT_DIR/exatest/dbtestcase.py" --server "$server" --driver "$odbc_driver"
-#run_test "$SCRIPT_DIR/exatest/expectations.py"
-#run_test "$SCRIPT_DIR/exatest/parameterized.py"
-#run_test "$SCRIPT_DIR/exatest/servers.py"
-run_test "$SCRIPT_DIR/udf/tutorial.py" --server "$server" --driver "$odbc_driver" --lang foo
+run_tests_in_folder "$SCRIPT_DIR/exatest" "$server" "$odbc_driver"
+run_tests_in_folder "$SCRIPT_DIR/udf" "$server" "$odbc_driver"

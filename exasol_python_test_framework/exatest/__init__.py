@@ -23,6 +23,7 @@ from unittest import (
 
 import pyodbc
 
+from .clients.client_setup import ClientSetup
 from .threading import Thread
 from .testcase import *
 
@@ -78,7 +79,6 @@ class TestLoader(unittest.TestLoader):
         # the same time. Please don't do this :)
         for _, _, obj in sorted(objects):
             tests.append(self.loadTestsFromTestCase(obj))
-
         load_tests = getattr(module, 'load_tests', None)
         tests = self.suiteClass(tests)
         if use_load_tests and load_tests is not None:
@@ -184,11 +184,12 @@ class TestLoader(unittest.TestLoader):
         else:
             raise TypeError("don't know how to make test from: %s" % obj)
 
+
 class TestProgram(object):
     logger_name = 'exatest.main'
 
     def __init__(self):
-        self.dsn = "exatest"
+        self._client_setup = ClientSetup()
         self.opts = self._parse_opts()
         self.init_logger()
         self.opts.log = logging.getLogger(self.logger_name)
@@ -216,21 +217,6 @@ class TestProgram(object):
         root.addHandler(console)
         root.setLevel(logging.DEBUG)
 
-    def validate_driver_path(self, parser: argparse.ArgumentParser, arg: str):
-        if not arg:
-            raise argparse.ArgumentTypeError("The driver path is empty!")
-        import os.path
-        absolute = os.path.abspath(os.path.expanduser(arg))
-        if not os.path.exists(absolute):
-            raise argparse.ArgumentTypeError(f"The driver path '{absolute}' does not exist!")
-        else:
-            return absolute
-
-    def validate_server(self, parser: argparse.ArgumentParser, arg: str):
-        if not arg:
-            raise argparse.ArgumentTypeError("The connection string is empty!")
-        return arg
-
     def _parse_opts(self):
         desc = self.__doc__
         epilog = ''
@@ -245,20 +231,7 @@ class TestProgram(object):
         parser.add_argument('tests', nargs='*',
             help='classes or methods to run in the form "TestCaseClass" or "TestCaseClass.test_method" (default: run all tests)')
 
-        odbc = parser.add_argument_group('ODBC specific')
-        odbc.add_argument('--server',
-                          help='connection string',
-                          required=True,
-                          type=lambda x: self.validate_server(parser, x))
-        odbc.add_argument('--user', help='connection user', nargs="?", type=str, default="sys")
-        odbc.add_argument('--password', help='connection password', nargs="?", type=str, default="exasol")
-        odbc.add_argument('--driver',
-                          help='path to ODBC driver',
-                          required=True,
-                          type=lambda x: self.validate_driver_path(parser, x))
-        odbcloglevel = ('off', 'error', 'normal', 'verbose')
-        odbc.add_argument('--odbc-log', choices=odbcloglevel,
-            help='activate ODBC driver log (default: %(default)s)')
+        self._client_setup.odbc_arguments(parser.add_argument_group('ODBC specific'))
 
         debug = parser.add_argument_group('generic options')
         choices = ('critical', 'error', 'warning', 'info', 'debug')
@@ -314,16 +287,15 @@ class TestProgram(object):
 
     def _main(self):
         self.opts.log.info('prepare for tests')
-        name = self._write_odbcini()
-
-        os.environ['ODBCINI'] = name
+        self._client_setup.prepare_odbc_init(self.opts.logdir, self.opts.server, self.opts.driver,
+                                             self.opts.user, self.opts.password, self.opts.odbc_log)
         prepare_ok = self.prepare_hook()
         self.opts.log.info('starting tests')
         testprogram = unittest.main(
                 argv=self.opts.unittest_args,
                 failfast=self.opts.failfast,
                 verbosity=self.opts.verbosity,
-                testLoader=TestLoader(dsn=self.dsn,user=self.opts.user,password=self.opts.password),
+                testLoader=TestLoader(dsn=self._client_setup.dsn, user=self.opts.user, password=self.opts.password),
                 exit=False,
                 )
         self.opts.log.info('finished tests')
@@ -331,29 +303,6 @@ class TestProgram(object):
                 testprogram.result.wasSuccessful() and
                 len(testprogram.result.unexpectedSuccesses) == 0) else 1
         sys.exit(rc)
-
-    def _write_odbcini(self):
-        name = os.path.realpath(os.path.join(self.opts.logdir, 'odbc.ini'))
-        server=socket.getfqdn(self.opts.server)
-        with open(name, 'w') as tmp:
-            tmp.write('[ODBC Data Sources]\n')
-            tmp.write('%s=EXASolution\n'%self.dsn)
-            tmp.write('\n')
-            tmp.write('[%s]\n'%self.dsn)
-            tmp.write('Driver = %s\n' % self.opts.driver)
-            tmp.write('EXAHOST = %s\n' % server)
-            tmp.write('EXAUID = %s\n' % self.opts.user)
-            tmp.write('EXAPWD = %s\n' % self.opts.password)
-            tmp.write('CONNECTIONLCCTYPE = en_US.UTF-8\n')      # TODO Maybe make this optional
-            tmp.write('CONNECTIONLCNUMERIC = en_US.UTF-8\n')
-            if self.opts.odbc_log != 'off':
-                tmp.write('EXALOGFILE = %s/exaodbc.log\n' % self.opts.logdir)
-                tmp.write('LOGMODE = %s\n' % {
-                        'error': 'ON ERROR ONLY',
-                        'normal': 'DEFAULT',
-                        'verbose': 'VERBOSE',
-                        }[self.opts.odbc_log])
-        return name
 
     def _resolve_host_to_ipv4(self,server):
         host_port_split=server.split(":")

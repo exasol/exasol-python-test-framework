@@ -159,26 +159,12 @@ class FTPServer(BaseSimpleServer):
         super(FTPServer, self).stop()
 
 
-class _SMTPChannel(smtpd.SMTPChannel):
-    '''EHLO is missing in smtpd.SMTPChannel'''
-    def smtp_EHLO(self, arg):
-        if not arg:
-            self.push('501 Syntax: EHLO hostname')
-            return
-        if self.seen_greeting:
-            self.push('503 Duplicate HELO/EHLO')
-        else:
-            self.seen_greeting = arg
-            self.push('250 %s' % self.fqdn)
-
-
-
 class _SMTPServer(smtpd.SMTPServer):
     '''Use private map; ignore remoteaddr'''
-    def __init__(self, localaddr, map, debug=False, esmtp=True):
+    def __init__(self, localaddr, map, debug=False):
         self._localaddr = localaddr
         self._remoteaddr = None
-        self.__smtpchannel = _SMTPChannel if esmtp else smtpd.SMTPChannel
+        self.__smtpchannel = smtpd.SMTPChannel
         self.__debug = debug
         self.__messages = []
         self._decode_data = True
@@ -223,16 +209,15 @@ class _SMTPServer(smtpd.SMTPServer):
 
 
 class SMTPServer(BaseSimpleServer):
-    def __init__(self, debug=False, esmtp=True):
+    def __init__(self, debug=False):
         super(SMTPServer, self).__init__()
-        self.esmtp = esmtp
         self.debug = debug
         self._server = None
         self._wait_for_server = threading.Semaphore(0)
 
     def _smtpserver(self):
         map = None
-        self._server = _SMTPServer(('', 0), map, debug=self.debug, esmtp=self.esmtp)
+        self._server = _SMTPServer(('', 0), map, debug=self.debug)
         self._wait_for_server.release()
         asyncore.loop(timeout=1, map=map)
 

@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 
 import unittest
-import os
-import sys
-
-from exasol_python_test_framework.exatest.test import selftest
 
 from exasol_python_test_framework import exatest
+from exasol_python_test_framework.exatest.test import selftest, run_selftest
+
 from exasol_python_test_framework.exatest.testcase import (
         useData,
         ParameterizedTestCase,
@@ -18,12 +16,13 @@ from exasol_python_test_framework.exatest.testcase import (
         )
 
 class ParameterizedTestCaseTest(unittest.TestCase):
+
     def test_metatest(self):
         class Module:
-            class Test(unittest.TestCase):
+            class Test(exatest.TestCase):
                 def test_pass(self):
                     pass
-            
+
                 def test_fail(self):
                     self.fail()
 
@@ -32,11 +31,11 @@ class ParameterizedTestCaseTest(unittest.TestCase):
             self.assertEqual(2, result.testsRun)
             self.assertIn('test_pass', result.output)
             self.assertIn('test_fail', result.output)
-    
+
 
     def test_parameterized_tests(self):
         class Module:
-            class Test(ParameterizedTestCase):
+            class Test(exatest.TestCase):
                 data = [(x,) for x in range(10)]
                 @useData(data)
                 def test_foo(self, x):
@@ -47,7 +46,7 @@ class ParameterizedTestCaseTest(unittest.TestCase):
 
     def test_large_parameterized_tests(self):
         class Module:
-            class Test(ParameterizedTestCase):
+            class Test(exatest.TestCase):
                 data = [(x,) for x in range(1000)]
                 @useData(data)
                 def test_foo(self, x):
@@ -58,7 +57,7 @@ class ParameterizedTestCaseTest(unittest.TestCase):
 
     def test_parameterized_tests_with_multiple_parameters(self):
         class Module:
-            class Test(ParameterizedTestCase):
+            class Test(exatest.TestCase):
                 @useData([(21, 42)])
                 def test_without_docstring(self, x, y):
                     self.assertEqual(21, x)
@@ -69,7 +68,7 @@ class ParameterizedTestCaseTest(unittest.TestCase):
 
     def test_parameterized_tests_with_default_docstring(self):
         class Module:
-            class Test(ParameterizedTestCase):
+            class Test(exatest.TestCase):
                 @useData([(21,), (42,)])
                 def test_without_docstring(self, x):
                     pass
@@ -80,7 +79,7 @@ class ParameterizedTestCaseTest(unittest.TestCase):
 
     def test_parameterized_tests_with_docstring(self):
         class Module:
-            class Test(ParameterizedTestCase):
+            class Test(exatest.TestCase):
                 @useData([(21,), (42,)])
                 def test_with_docstring(self, x):
                     'some_text'
@@ -90,10 +89,11 @@ class ParameterizedTestCaseTest(unittest.TestCase):
             self.assertIn('\nsome_text; data: (21,) ... ok', result.output)
             self.assertIn('\nsome_text; data: (42,) ... ok', result.output)
 
+
 class DecoratorInteraction(unittest.TestCase):
     def test_parameterized_tests_with_decorator_skip(self):
         class Module:
-            class Test(ParameterizedTestCase):
+            class Test(exatest.TestCase):
                 @useData((x,) for x in range(2))
                 @skip('some reason')
                 def test_skipped_with_param(self, x):
@@ -104,7 +104,7 @@ class DecoratorInteraction(unittest.TestCase):
 
     def test_parameterized_tests_with_decorator_skipIf(self):
         class Module:
-            class Test(ParameterizedTestCase):
+            class Test(exatest.TestCase):
                 @useData((x,) for x in range(2))
                 @skipIf(False, 'Some Reason 1')
                 def test_1(self, x): self.assertIn(x, range(2))
@@ -120,7 +120,7 @@ class DecoratorInteraction(unittest.TestCase):
 
     def test_parameterized_tests_with_decorator_expectedFailure(self):
         class Module:
-            class Test(ParameterizedTestCase):
+            class Test(exatest.TestCase):
                 @useData((x,) for x in range(2))
                 @expectedFailure
                 def test_skipped_with_param(self, x):
@@ -129,10 +129,11 @@ class DecoratorInteraction(unittest.TestCase):
         with selftest(Module) as result:
             self.assertEqual(2, len(result.expectedFailures))
 
+
 class ConditionalTestCaseTest(unittest.TestCase):
     def test_skip(self):
         class Module:
-            class Test(ParameterizedTestCase):
+            class Test(exatest.TestCase):
                 @skip('Some Reason')
                 def test_1(self): pass
 
@@ -142,7 +143,7 @@ class ConditionalTestCaseTest(unittest.TestCase):
 
     def test_skipIf(self):
         class Module:
-            class Test(ParameterizedTestCase):
+            class Test(exatest.TestCase):
                 @skipIf(False, 'Some Reason 1')
                 def test_1(self): pass
 
@@ -154,57 +155,57 @@ class ConditionalTestCaseTest(unittest.TestCase):
             self.assertNotIn('Some Reason 1', result.output)
             self.assertIn('Some Reason 2', result.output)
 
-
     def test_expectedFailure_tests(self):
         class Module:
-            class Test(unittest.TestCase):
+            class Test(exatest.TestCase):
                 def test_1(self): pass
                 @expectedFailure
                 def test_2(self): self.fail()
                 @expectedFailure
                 def test_3(self): pass
-        
+
         with selftest(Module) as result:
-            self.assertIn('\ntest_2 (__main__.Test) ... expected failure', result.output)
-            self.assertIn('\ntest_3 (__main__.Test) ... unexpected success', result.output)
+            self.assertIn('\ntest_2 (__main__.ConditionalTestCaseTest.test_expectedFailure_tests.<locals>.Module.Test) ... expected failure', result.output)
+            self.assertIn('\ntest_3 (__main__.ConditionalTestCaseTest.test_expectedFailure_tests.<locals>.Module.Test) ... unexpected success', result.output)
             self.assertEqual(1, len(result.expectedFailures))
             self.assertEqual(1, len(result.unexpectedSuccesses))
 
     def test_expectedFailureIf_True_tests(self):
         class Module:
-            class Test(unittest.TestCase):
+            class Test(exatest.TestCase):
                 def test_1(self): pass
                 @expectedFailureIf(True)
                 def test_2(self): self.fail()
                 @expectedFailureIf(True)
                 def test_3(self): pass
-        
+
         with selftest(Module) as result:
-            self.assertIn('\ntest_2 (__main__.Test) ... expected failure', result.output)
-            self.assertIn('\ntest_3 (__main__.Test) ... unexpected success', result.output)
+            self.assertIn('\ntest_2 (__main__.ConditionalTestCaseTest.test_expectedFailureIf_True_tests.<locals>.Module.Test) ... expected failure', result.output)
+            self.assertIn('\ntest_3 (__main__.ConditionalTestCaseTest.test_expectedFailureIf_True_tests.<locals>.Module.Test) ... unexpected success', result.output)
             self.assertEqual(1, len(result.expectedFailures))
             self.assertEqual(1, len(result.unexpectedSuccesses))
 
     def test_expectedFailureIf_False_tests(self):
         class Module:
-            class Test(unittest.TestCase):
+            class Test(exatest.TestCase):
                 def test_1(self): pass
                 @expectedFailureIf(False)
                 def test_2(self): self.fail()
                 @expectedFailureIf(False)
                 def test_3(self): pass
-        
+
         with selftest(Module) as result:
-            self.assertIn('\ntest_2 (__main__.Test) ... FAIL', result.output)
-            self.assertIn('\ntest_3 (__main__.Test) ... ok', result.output)
+            self.assertIn('\ntest_2 (__main__.ConditionalTestCaseTest.test_expectedFailureIf_False_tests.<locals>.Module.Test) ... FAIL', result.output)
+            self.assertIn('\ntest_3 (__main__.ConditionalTestCaseTest.test_expectedFailureIf_False_tests.<locals>.Module.Test) ... ok', result.output)
             self.assertEqual(1, len(result.failures))
             self.assertEqual(0, len(result.expectedFailures))
             self.assertEqual(0, len(result.unexpectedSuccesses))
 
+
 class TestCaseOrderTest(unittest.TestCase):
     def test_order_of_undecorated_test_methods(self):
         class Module:
-            class Test(ParameterizedTestCase):
+            class Test(exatest.TestCase):
                 def test_03(self): pass
                 def test_02(self): pass
                 def test_01(self): pass
@@ -213,7 +214,7 @@ class TestCaseOrderTest(unittest.TestCase):
 
     def test_order_of_skipped_test_methods(self):
         class Module:
-            class Test(ParameterizedTestCase):
+            class Test(exatest.TestCase):
                 def test_03(self): pass
                 @skip('broken')
                 def test_02(self): pass
@@ -237,7 +238,7 @@ class TestCaseOrderTest(unittest.TestCase):
 
     def test_order_of_expecedFailure_test_methods(self):
         class Module:
-            class Test(ParameterizedTestCase):
+            class Test(exatest.TestCase):
                 def test_03(self): pass
                 @expectedFailure
                 def test_02(self): pass
@@ -261,7 +262,7 @@ class TestCaseOrderTest(unittest.TestCase):
 
     def test_order_of_parameterized_test_methods(self):
         class Module:
-            class Test(ParameterizedTestCase):
+            class Test(exatest.TestCase):
                 data = [(x,) for x in range(3)]
                 def test_B(self): pass
                 @useData(data)
@@ -278,6 +279,4 @@ class TestCaseOrderTest(unittest.TestCase):
             self.assertLess(get_sort_key(expected_order[i]), get_sort_key(expected_order[i+1]))
 
 if __name__ == '__main__':
-    unittest.main()
-
-# vim: ts=4:sts=4:sw=4:et:fdm=indent
+    run_selftest()
