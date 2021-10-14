@@ -20,8 +20,8 @@ function run_test() {
 # $2: exasol server address
 # $3: odbc_driver
 function run_tests_in_folder() {
-  for test_ in "$1"/*.py; do
-      run_test "$SCRIPT_DIR/exatest/dbtestcase.py" --server "$2" --driver "$3"
+  for test_ in $1/*.py; do
+      run_test "$test_" --server "$2" --driver "$3"
   done
 }
 
@@ -57,3 +57,4 @@ fi
 SCRIPT_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
 run_tests_in_folder "$SCRIPT_DIR/exatest" "$server" "$odbc_driver"
 run_tests_in_folder "$SCRIPT_DIR/udf" "$server" "$odbc_driver"
+run_tests_in_folder "$SCRIPT_DIR/docker_db_environment" "$server" "$odbc_driver"
