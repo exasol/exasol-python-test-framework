@@ -34,8 +34,8 @@ def os_timer():
         yield
     finally:
         after = os.times()
-        print(('\nreal %7.2fs\nuser %7.2fs\nsys  %7.2fs\n' % (
-            after[4] - before[4], after[0] - before[0], after[1] - before[1])))
+        print('\nreal %7.2fs\nuser %7.2fs\nsys  %7.2fs\n' % (
+            after[4] - before[4], after[0] - before[0], after[1] - before[1]))
 
 @contextlib.contextmanager
 def timer():

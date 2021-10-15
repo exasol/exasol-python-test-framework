@@ -6,7 +6,7 @@ class MetricMeasurements:
     def __init__(self,metric_name, measurements):
         self._metric_name = metric_name
         self._measurements = measurements
-        print(("measurements:",self._measurements))
+        print("measurements:",self._measurements)
         array=np.array(self._measurements)
         self._stats = stats.describe(array)
         self._bayes_mvs = stats.bayes_mvs(array)

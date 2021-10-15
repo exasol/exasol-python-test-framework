@@ -55,7 +55,7 @@ class MessageBox(BaseSimpleServer):
         self._thread.start()
         self.host = socket.gethostbyname(socket.getfqdn())
         self.port = s.getsockname()[1]
-        print(('host: {}, sn.host: {}, sn.port: {}'.format(self.host, s.getsockname()[0], self.port)))
+        print('host: {}, sn.host: {}, sn.port: {}'.format(self.host, s.getsockname()[0], self.port))
 
     @property
     def data(self):

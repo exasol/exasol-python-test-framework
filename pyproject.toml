@@ -6,7 +6,7 @@ description = "Python Test framework for Exasol database tests"
 license = "MIT"
 
 authors = [
-    "Exasol Ag <opensource@exasol.com>"
+    "Exasol AG <opensource@exasol.com>"
 ]
 
 readme = 'README.md'  # Markdown files are supported

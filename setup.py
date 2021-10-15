@@ -26,7 +26,7 @@ setup_kwargs = {
     'version': '0.1.0',
     'description': 'Python Test framework for Exasol database tests',
     'long_description': '# Exasol Python Test Framework\n\n## About\n\nThis project is shared among other Exasol projects, and provides a test framework to execute integration tests on the database. \n\n\n## Prerequisites\n\n* Python3\n\n',
-    'author': 'Exasol Ag',
+    'author': 'Exasol AG',
     'author_email': 'opensource@exasol.com',
     'maintainer': None,
     'maintainer_email': None,
