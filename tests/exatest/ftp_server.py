@@ -31,6 +31,7 @@ class FTPServerTest(unittest.TestCase):
                             ls = ftp.retrlines('LIST', data.append)
                             ftp.quit()
                     self.assertIn('dummy', '\n'.join(data))
+
         with selftest(Module) as result:
             self.assertTrue(result.wasSuccessful())
 
@@ -53,21 +54,25 @@ class FTPServerTest(unittest.TestCase):
                             ftp.quit()
                     self.assertIn('dummy', '\n'.join(data))
                     self.assertIn('some_dir', '\n'.join(data))
+
         with selftest(Module) as result:
             self.assertTrue(result.wasSuccessful())
 
     def test_server_is_chdir_safe(self):
         class Module:
             class Test(exatest.TestCase):
-                def test_server_is_chdir_safe(self, x):
+                def test_server_is_chdir_safe(self):
                     cwd = os.getcwd()
                     with tempdir() as tmp:
                         self.assertEqual(cwd, os.getcwd())
                         with FTPServer(tmp) as ftpd:
-                            time.sleep(0.2) #Without sleep the FTPServer starts and stops immediately which might cause a race condition during shutdown
+                            # Without sleep the FTPServer starts and stops immediately
+                            # which might cause a race condition during shutdown
+                            time.sleep(0.2)
                             self.assertEqual(cwd, os.getcwd())
                         self.assertEqual(cwd, os.getcwd())
                     self.assertEqual(cwd, os.getcwd())
+
         with selftest(Module) as result:
             self.assertTrue(result.wasSuccessful())
 
