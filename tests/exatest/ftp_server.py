@@ -2,8 +2,10 @@
 
 import ftplib
 import os
+import time
 import unittest
 
+from exasol_python_test_framework.exatest import useData
 from exasol_python_test_framework.exatest.test import selftest, run_selftest
 
 from exasol_python_test_framework import exatest
@@ -55,13 +57,21 @@ class FTPServerTest(unittest.TestCase):
             self.assertTrue(result.wasSuccessful())
 
     def test_server_is_chdir_safe(self):
-        cwd = os.getcwd()
-        with tempdir() as tmp:
-            self.assertEqual(cwd, os.getcwd())
-            with FTPServer(tmp) as ftpd:
-                self.assertEqual(cwd, os.getcwd())
-            self.assertEqual(cwd, os.getcwd())
-        self.assertEqual(cwd, os.getcwd())
+        class Module:
+            class Test(exatest.TestCase):
+                data = [(x,) for x in range(100)]
+                @useData(data)
+                def test_server_is_chdir_safe(self, x):
+                    print(f"Iteration:{x}")
+                    cwd = os.getcwd()
+                    with tempdir() as tmp:
+                        self.assertEqual(cwd, os.getcwd())
+                        with FTPServer(tmp) as ftpd:
+                            self.assertEqual(cwd, os.getcwd())
+                        self.assertEqual(cwd, os.getcwd())
+                    self.assertEqual(cwd, os.getcwd())
+        with selftest(Module) as result:
+            self.assertTrue(result.wasSuccessful())
 
 
 if __name__ == '__main__':
