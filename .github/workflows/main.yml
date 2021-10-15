@@ -14,6 +14,12 @@ jobs:
       - name: Spawn EXASOL environemnt
         run: ./start-test-env spawn-test-environment --environment-name test --database-port-forward 8888 --bucketfs-port-forward 6666 --db-mem-size 4GB
         working-directory: ../integration-test-docker-environment
+      - name: Trace Docker info
+        run: |
+          echo Docker networks:
+          docker network list
+          echo Docker containers:
+          docker ps
       - name: Get ODBC driver
         run: |
           mkdir -p downloads/ODBC
