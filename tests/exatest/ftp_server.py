@@ -67,6 +67,7 @@ class FTPServerTest(unittest.TestCase):
                     with tempdir() as tmp:
                         self.assertEqual(cwd, os.getcwd())
                         with FTPServer(tmp) as ftpd:
+                            time.sleep(0.2)
                             self.assertEqual(cwd, os.getcwd())
                         self.assertEqual(cwd, os.getcwd())
                     self.assertEqual(cwd, os.getcwd())
