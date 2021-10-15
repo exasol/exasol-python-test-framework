@@ -59,15 +59,12 @@ class FTPServerTest(unittest.TestCase):
     def test_server_is_chdir_safe(self):
         class Module:
             class Test(exatest.TestCase):
-                data = [(x,) for x in range(100)]
-                @useData(data)
                 def test_server_is_chdir_safe(self, x):
-                    print(f"Iteration:{x}")
                     cwd = os.getcwd()
                     with tempdir() as tmp:
                         self.assertEqual(cwd, os.getcwd())
                         with FTPServer(tmp) as ftpd:
-                            time.sleep(0.2)
+                            time.sleep(0.2) #Without sleep the FTPServer starts and stops immediately which might cause a race condition during shutdown
                             self.assertEqual(cwd, os.getcwd())
                         self.assertEqual(cwd, os.getcwd())
                     self.assertEqual(cwd, os.getcwd())
