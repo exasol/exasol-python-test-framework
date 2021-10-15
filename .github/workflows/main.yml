@@ -14,21 +14,14 @@ jobs:
       - name: Spawn EXASOL environemnt
         run: ./start-test-env spawn-test-environment --environment-name test --database-port-forward 8888 --bucketfs-port-forward 6666 --db-mem-size 4GB
         working-directory: ../integration-test-docker-environment
-      - name: Trace Docker info
-        run: |
-          echo Docker networks:
-          docker network list
-          echo Docker containers:
-          docker ps
       - name: Get ODBC driver
         run: |
-          mkdir -p downloads/ODBC
-          curl -s https://www.exasol.com/support/secure/attachment/155337/EXASOL_ODBC-7.0.11.tar.gz| tar -C downloads/ODBC --strip-components 1 -zxf -
+          "bash .github/workflows/scripts/download_odbc_driver.sh $(pwd)"
         working-directory: ..
       - name: Get EXAPLUS
         run: |
-          mkdir -p downloads/EXAPLUS
-          curl -s https://www.exasol.com/support/secure/attachment/155319/EXAplus-7.0.11.tar.gz | tar -C downloads/EXAPLUS --strip-components 1 -zxf -
+          run: |
+            "bash .github/workflows/scripts/download_exaplus.sh $(pwd)"
         working-directory: ..
       - name: Setup Python 3.6 for integration-test-docker-environment
         uses: actions/setup-python@v2
