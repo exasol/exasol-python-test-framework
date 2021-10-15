@@ -35,5 +35,5 @@ jobs:
         env:
           EXAPLUS: ../downloads/EXAPLUS
           TEST_DOCKER_NETWORK_NAME: db_network_exasol_test
-          TEST_ENVIRONMENT_NAME: testenv
+          TEST_ENVIRONMENT_NAME: test
 
