@@ -15,7 +15,11 @@ package_data = \
 {'': ['*']}
 
 install_requires = \
-['docker>=5.0.3', 'numpy==1.19.5', 'pyodbc>=4.0.27', 'scipy==1.2.1']
+['docker>=5.0.3',
+ 'numpy==1.19.5',
+ 'pyftpdlib>=1.5.6',
+ 'pyodbc>=4.0.27',
+ 'scipy==1.2.1']
 
 setup_kwargs = {
     'name': 'exasol-python-test-framework',

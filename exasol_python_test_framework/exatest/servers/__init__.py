@@ -4,11 +4,9 @@ import http.server
 import socketserver
 import asyncore
 import collections
-import os
 import select
 import smtpd
 import socket
-import sys
 import threading
 
 from ..threading import Thread
@@ -130,7 +128,6 @@ class HTTPServer(BaseSimpleServer):
 class FTPServer(BaseSimpleServer):
     def __init__(self, documentroot='.', authorizer=None):
         global ftpserver
-        from . import servers
         from . import authorizers
         super(FTPServer, self).__init__()
         self.documentroot = documentroot
@@ -144,7 +141,8 @@ class FTPServer(BaseSimpleServer):
         self._server.serve_forever()
 
     def start(self):
-        from . import handlers, servers
+        from . import handlers
+        from pyftpdlib import servers
         ftp_handler = handlers.FTPHandler
         ftp_handler.authorizer = self.authorizer
         self._server = servers.FTPServer(('', 0), ftp_handler)
