@@ -10,13 +10,10 @@ jobs:
       - uses: actions/checkout@v2
       - name: Get ODBC driver
         run: |
-          bash .github/workflows/scripts/download_odbc_driver.sh "$(pwd)"
-        working-directory: ..
+          bash .github/workflows/scripts/download_odbc_driver.sh "$(pwd)/.."
       - name: Get EXAPLUS
         run: |
-          run: |
-            bash .github/workflows/scripts/download_exaplus.sh "$(pwd)"
-        working-directory: ..
+          bash .github/workflows/scripts/download_exaplus.sh "$(pwd)/.."
       - name: Checkout test environment
         run: git clone https://github.com/exasol/integration-test-docker-environment.git
         working-directory: ..
