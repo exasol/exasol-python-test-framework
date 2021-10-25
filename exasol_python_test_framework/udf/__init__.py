@@ -155,9 +155,9 @@ main = TestProgram
 
 
 def load_functions(client, lang=None, lang_path=None, schema='FN1', redirector=None):
-    path = lang_path if lang_path is not None else os.path.realpath(os.path.join(os.path.abspath(__file__),
-                                                                                 '../../../lang', lang))
-
+    local_lang_path = lang_path if lang_path is not None \
+                                else os.path.join(os.path.abspath(__file__), '../../../lang')
+    path = os.path.realpath(os.path.join(local_lang_path, lang))
     if not os.path.isdir(path):
         opts.log.critical('%s does not exits', path)
         return False
