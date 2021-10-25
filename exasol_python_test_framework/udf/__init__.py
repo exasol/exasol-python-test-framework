@@ -111,6 +111,8 @@ class TestProgram(exatest.TestProgram):
         new_opts = parser.add_argument_group('UDF specific')
         new_opts.add_argument('--lang',
             help='programming language (default: %(default)s)')
+        new_opts.add_argument('--lang-path',
+            help='programming language base path (default: %(default)s)')
         new_opts.add_argument('--redirector-url',
             help='comma separated list of redirector urls for external script service (default: %(default)s)')
         new_opts.add_argument('--testparam',
@@ -123,6 +125,7 @@ class TestProgram(exatest.TestProgram):
             help=' language definition, (default: %(default)s)')
         parser.set_defaults(
                 lang=None,
+                lang_path=None,
                 redirector_url=None,
                 param=None,
                 jdbc_path=None,
@@ -135,16 +138,22 @@ class TestProgram(exatest.TestProgram):
         global opts
         opts = self.opts
         if opts.lang is not None:
+            assert opts.lang_path is not None
             client = ODBCClient(self._client_setup.dsn, opts.user, opts.password)
             client.connect(autocommit=True)
-            return load_functions(client=client, lang=opts.lang, schema='FN1', redirector=opts.redirector_url)
+            return load_functions(client=client, lang=opts.lang,
+                                  lang_path=opts.lang_path, schema='FN1', redirector=opts.redirector_url)
         return True
+
 
 main = TestProgram
 
-def load_functions(client, lang=None, schema='FN1', redirector=None):
-    path = os.path.realpath(os.path.join(os.path.abspath(__file__),
+
+def load_functions(client, lang=None, lang_path=None, schema='FN1', redirector=None):
+
+    path = lang_path if lang_path is not None else os.path.realpath(os.path.join(os.path.abspath(__file__),
             '../../../lang', lang))
+
     if not os.path.isdir(path):
         opts.log.critical('%s does not exits', path)
         return False
