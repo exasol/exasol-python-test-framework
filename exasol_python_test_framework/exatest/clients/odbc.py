@@ -13,6 +13,7 @@ except ValueError:  # The version number is not a number...
 class ClientError(Exception):
     pass
 
+
 def getScriptLanguagesFromArgs():
     for i, arg in enumerate(sys.argv):
         if arg == '--script-languages':
@@ -20,13 +21,11 @@ def getScriptLanguagesFromArgs():
                 raise ClientError('Value for --script-languages missing')
             return sys.argv[i + 1]
 
+
 class ODBCClient(object):
     def __init__(self, dsn, user="sys", password="exasol"):
         self.cursor = None
-        self.params = {}
-        self.params['dsn'] = dsn
-        self.params['uid'] = user
-        self.params['pwd'] = password
+        self.params = {'dsn': dsn, 'uid': user, 'pwd': password}
 
     def connect(self, **kwargs):
         params = self.params.copy()
@@ -37,13 +36,9 @@ class ODBCClient(object):
         self._setScriptLanguagesFromArgs()
 
     def _setScriptLanguagesFromArgs(self):
-        for i, arg in enumerate(sys.argv):
-            if arg == '--script-languages':
-                if len(sys.argv) == i + 1:
-                    raise ClientError('Value for --script-languages missing')
-                langs=getScriptLanguagesFromArgs()
-                self.query("ALTER SESSION SET SCRIPT_LANGUAGES='%s'" % langs)
-                break
+        langs = getScriptLanguagesFromArgs()
+        if langs is not None:
+            self.query("ALTER SESSION SET SCRIPT_LANGUAGES='%s'" % langs)
 
     def query(self, qtext, *args):
         if self.cursor is None:
@@ -77,7 +72,7 @@ class ODBCClient(object):
 
     def rowcount(self):
         return self.cursor.rowcount
-        
+
     def cursorDescription(self):
         return self.cursor.description
 
