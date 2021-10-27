@@ -241,8 +241,6 @@ class TestProgram(object):
             help='run program under pdb (Python debugger)')
         debug.add_argument('--profiler', action='store_true',
             help='run program with profiler')
-        debug.add_argument('--lint', action='store_true',
-            help='static code checker (PyLint)')
         parser.set_defaults(
                 verbosity=1,
                 failfast=False,
@@ -253,7 +251,6 @@ class TestProgram(object):
                 driver=None,
                 debugger=False,
                 profiler=False,
-                lint=False,
                 )
         self.parser_hook(parser)
         opts = parser.parse_args()
@@ -274,8 +271,6 @@ class TestProgram(object):
                     s.sort_stats("cumulative").print_stats(50)
             elif self.opts.debugger:
                 pdb.runcall(self._main)
-            elif self.opts.lint:
-                self._lint()
             else:
                 self._main()
 
@@ -309,20 +304,6 @@ class TestProgram(object):
         host_port_split[0] = socket.gethostbyname(host_port_split[0])
         return ":".join(host_port_split)
 
-    def _lint(self):
-        env = os.environ.copy()
-        env['PYTHONPATH'] = os.path.realpath(os.path.join(
-                os.path.abspath(__file__), '../..'))
-        pylint = '/usr/opt/bs-python-2.7/bin/pylint'
-        if not os.path.exists(pylint):
-            pylint = "pylint"
-        cmd = [pylint,
-                '--rcfile=%s' % os.path.realpath(
-                        os.path.join(os.path.abspath(__file__), '../../pylintrc')),
-                sys.argv[0]]
-        if os.isatty(sys.stdout.fileno()):
-            cmd.append('--output-format=colorized')
-        os.execve(cmd[0], cmd, env)
 
 main = TestProgram
 
