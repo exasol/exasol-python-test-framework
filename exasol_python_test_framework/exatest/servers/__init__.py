@@ -1,7 +1,7 @@
-from __future__ import absolute_import
 
-import SimpleHTTPServer
-import SocketServer
+
+import http.server
+import socketserver
 import asyncore
 import collections
 import select
@@ -99,7 +99,7 @@ class UDPEchoServer(BaseSimpleServer):
         self.host = socket.gethostbyname(socket.getfqdn())
         self.port = s.getsockname()[1]
 
-class _ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
+class _ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     pass
 
 class HTTPServer(BaseSimpleServer):
@@ -113,7 +113,7 @@ class HTTPServer(BaseSimpleServer):
             self._server.serve_forever()        
 
     def start(self):
-        handler = SimpleHTTPServer.SimpleHTTPRequestHandler
+        handler = http.server.SimpleHTTPRequestHandler
         self._server = _ThreadedTCPServer(('', 0), handler)
         
         self._thread = Thread(target=self._httpserver, args=())
@@ -142,6 +142,7 @@ class FTPServer(BaseSimpleServer):
 
     def start(self):
         from . import handlers
+        from pyftpdlib import servers
         ftp_handler = handlers.FTPHandler
         ftp_handler.authorizer = self.authorizer
         self._server = servers.FTPServer(('', 0), ftp_handler)
@@ -156,26 +157,15 @@ class FTPServer(BaseSimpleServer):
         super(FTPServer, self).stop()
 
 
-class _SMTPChannel(smtpd.SMTPChannel):
-    '''EHLO is missing in smtpd.SMTPChannel'''
-    def smtp_EHLO(self, arg):
-        if not arg:
-            self.push('501 Syntax: EHLO hostname')
-            return
-        if self.__greeting:
-            self.push('503 Duplicate HELO/EHLO')
-        else:
-            self.__greeting = arg
-            self.push('250 %s' % self.__fqdn)
-
 class _SMTPServer(smtpd.SMTPServer):
     '''Use private map; ignore remoteaddr'''
-    def __init__(self, localaddr, map, debug=False, esmtp=True):
+    def __init__(self, localaddr, map, debug=False):
         self._localaddr = localaddr
         self._remoteaddr = None
-        self.__smtpchannel = _SMTPChannel if esmtp else smtpd.SMTPChannel
+        self.__smtpchannel = smtpd.SMTPChannel
         self.__debug = debug
         self.__messages = []
+        self._decode_data = True
         asyncore.dispatcher.__init__(self, map=map)
         try:
             self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -196,37 +186,36 @@ class _SMTPServer(smtpd.SMTPServer):
 
     _message = collections.namedtuple('Message', 'host, sender, recipients, body')
 
-    def process_message(self, peer, mailfrom, rcpttos, data):
+    def process_message(self, peer, mailfrom, rcpttos, data, mail_options=[], rcpt_options=[]):
         self.__messages.append(self._message(peer, mailfrom, rcpttos, data))
         if self.__debug:
-            print '---------- MESSAGE ENVELOPE ---------'
-            print 'Peer:', peer
-            print 'From:', mailfrom
-            print 'To:', ', '.join(rcpttos)
+            print('---------- MESSAGE ENVELOPE ---------')
+            print('Peer:', peer)
+            print('From:', mailfrom)
+            print('To:', ', '.join(rcpttos))
             inheaders = 1
-            lines = data.split('\n')
-            print '---------- MESSAGE FOLLOWS ----------'
+            lines = data.split(b'\n')
+            print('---------- MESSAGE FOLLOWS ----------')
             for line in lines:
                 # headers first
                 if inheaders and not line:
-                    print 'X-Peer:', peer[0]
+                    print('X-Peer:', peer[0])
                     inheaders = 0
-                print line
-            print '------------ END MESSAGE ------------'
+                print(line)
+            print('------------ END MESSAGE ------------')
 
 
 
 class SMTPServer(BaseSimpleServer):
-    def __init__(self, debug=False, esmtp=True):
+    def __init__(self, debug=False):
         super(SMTPServer, self).__init__()
-        self.esmtp = esmtp
         self.debug = debug
         self._server = None
         self._wait_for_server = threading.Semaphore(0)
 
     def _smtpserver(self):
         map = None
-        self._server = _SMTPServer(('', 0), map, debug=self.debug, esmtp=self.esmtp)
+        self._server = _SMTPServer(('', 0), map, debug=self.debug)
         self._wait_for_server.release()
         asyncore.loop(timeout=1, map=map)
 

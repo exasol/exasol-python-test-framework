@@ -381,7 +381,7 @@ class _IOLoop(object):
         self.__class__._instance = None
 
         # free connections
-        instances = sorted(self.socket_map.values(), key=lambda x: x._fileno)
+        instances = sorted(list(self.socket_map.values()), key=lambda x: x._fileno)
         for inst in instances:
             try:
                 inst.close()

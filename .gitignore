@@ -3,3 +3,6 @@
 .env
 .idea
 dist
+*.log
+odbc.ini
+

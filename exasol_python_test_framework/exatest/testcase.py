@@ -104,7 +104,7 @@ def useData(generator):
 class _ParameterizedTestCaseMetaclass(type):
     def __new__(cls, name, bases, dct):
         new_tests = {}
-        for obj in dct.values():
+        for obj in list(dct.values()):
             if isinstance(obj, ParameterizedTest):
                 new_tests.update({test.__name__: test for test in obj})
         dct.update(new_tests)
@@ -113,8 +113,8 @@ class _ParameterizedTestCaseMetaclass(type):
         new_cls.log = logging.getLogger(name)
         return new_cls
 
-class ParameterizedTestCase(unittest.TestCase):
-    __metaclass__ = _ParameterizedTestCaseMetaclass
+class ParameterizedTestCase(unittest.TestCase, metaclass=_ParameterizedTestCaseMetaclass):
+    pass
 
 #
 # TestCase with integrated database connection
@@ -133,9 +133,7 @@ class _DBConnectionTestCaseMetaclass(_ParameterizedTestCaseMetaclass):
         new_cls.tearDown = new_cls._TestCase__tearDownWrapper
         return new_cls
 
-class TestCase(ParameterizedTestCase):
-    __metaclass__ = _DBConnectionTestCaseMetaclass
-
+class TestCase(ParameterizedTestCase, metaclass=_DBConnectionTestCaseMetaclass):
     def __init__(self, *args, **kwargs):
         self.dsn = kwargs["dsn"]
         self.user = kwargs["user"]
@@ -191,7 +189,8 @@ class TestCase(ParameterizedTestCase):
             return self._client.query(*args)
         except Exception as e:
             if not kwargs.get('ignore_errors'):
-                self.log.error('executing SQL failed: %s: %s', e.__class__.__name__, e)
+                if not kwargs.get('dont_log_exceptions'):
+                    self.log.error('executing SQL failed: %s: %s', e.__class__.__name__, e)
                 if not self.log.isEnabledFor(logging.DEBUG):
                     self.log.error('executed SQL was: %s', args[0])
                 raise
@@ -206,6 +205,12 @@ class TestCase(ParameterizedTestCase):
                 if not self.log.isEnabledFor(logging.DEBUG):
                     self.log.error('executed SQL was: %s', args[0])
                 raise
+
+    def executeMultipleStatements(self, sql_statements):
+        """Executes multiple semicolon separated SQL statements."""
+        stmts = [s.strip() for s in sql_statements.split(';') if len(s.strip()) > 0]
+        for stmt in stmts:
+            self.executeStatement(stmt)
 
     def queryScalar(self, *args, **kwargs):
         rows = self.query(*args, **kwargs)
@@ -236,7 +241,8 @@ class TestCase(ParameterizedTestCase):
     def assertRowsEqualIgnoreOrder(self, left, right, msg=None):
         lrows = [tuple(x) for x in left]
         rrows = [tuple(x) for x in right]
-        self.assertEqual(sorted(lrows), sorted(rrows), msg)
+        from collections import Counter
+        self.assertEqual(Counter(lrows), Counter(rrows), msg)
 
     def assertRowsEqual(self, left, right, msg=None):
         # TODO Proposal: Only convert to tuples if necessary, i.e. if not already a list of tuples (or only if this is a list of pyodbc.rows)
@@ -252,7 +258,8 @@ class TestCase(ParameterizedTestCase):
     def expectRowsEqualIgnoreOrder(self, left, right, msg=None):
         lrows = [tuple(x) for x in left]
         rrows = [tuple(x) for x in right]
-        self.expectEqual(sorted(lrows), sorted(rrows), msg)
+        from collections import Counter
+        self.expectEqual(Counter(lrows), Counter(rrows), msg)
 
     def expectRowsEqual(self, left, right, msg=None):
         # TODO Proposal: Only convert to tuples if necessary, i.e. if not already a list of tuples (or only if this is a list of pyodbc.rows)

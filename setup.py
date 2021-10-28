@@ -15,22 +15,26 @@ package_data = \
 {'': ['*']}
 
 install_requires = \
-['numpy', 'pyodbc', 'scipy']
+['docker>=5.0.3',
+ 'numpy==1.19.5',
+ 'pyftpdlib>=1.5.6',
+ 'pyodbc>=4.0.27',
+ 'scipy==1.2.1']
 
 setup_kwargs = {
     'name': 'exasol-python-test-framework',
     'version': '0.1.0',
     'description': 'Python Test framework for Exasol database tests',
     'long_description': '# Exasol Python Test Framework\n\n## About\n\nThis project is shared among other Exasol projects, and provides a test framework to execute integration tests on the database. \n\n\n## Prerequisites\n\n* Python3\n\n',
-    'author': 'Thomas Uebensee',
-    'author_email': 'ext.Thomas.Uebensee@exasol.com',
+    'author': 'Exasol AG',
+    'author_email': 'opensource@exasol.com',
     'maintainer': None,
     'maintainer_email': None,
     'url': 'https://github.com/exasol/exasol-python-test-framework',
     'packages': packages,
     'package_data': package_data,
     'install_requires': install_requires,
-    'python_requires': '>=2.7',
+    'python_requires': '>=3.6',
 }
 
 

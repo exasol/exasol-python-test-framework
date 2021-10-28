@@ -1,0 +1,35 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  integration_tests:
+    runs-on: ubuntu-18.04
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Get ODBC driver
+        run: |
+          bash .github/workflows/scripts/download_odbc_driver.sh "$(pwd)/.."
+      - name: Get EXAPLUS
+        run: |
+          bash .github/workflows/scripts/download_exaplus.sh "$(pwd)/.."
+      - name: Checkout test environment
+        run: git clone https://github.com/exasol/integration-test-docker-environment.git
+        working-directory: ..
+      - name: Spawn EXASOL environemnt
+        run: ./start-test-env spawn-test-environment --environment-name test --database-port-forward 8888 --bucketfs-port-forward 6666 --db-mem-size 4GB
+        working-directory: ../integration-test-docker-environment
+      - name: Setup Python 3.6 for integration-test-docker-environment
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.6
+      - name: Install Poetry
+        uses: abatilo/actions-poetry@v2.0.0
+      - name: Run all tests
+        run: ./run_all_tests.sh "localhost:8888" ../downloads/ODBC/lib/linux/x86_64/libexaodbc-uo2214lv2.so
+        env:
+          EXAPLUS: ../downloads/EXAPLUS
+          TEST_DOCKER_NETWORK_NAME: db_network_test
+          TEST_ENVIRONMENT_NAME: test
+
