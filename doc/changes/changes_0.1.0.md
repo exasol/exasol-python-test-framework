@@ -1,5 +1,7 @@
-# Exasol Python Test Framework 0.1.0, released 2021-10-28
+# Exasol Python Test Framework 0.1.0, released t.b.d.
  
+Code name: Initial release.
+
 ## Summary
 
 This is first release of the Exasol Python Test Framework. 
