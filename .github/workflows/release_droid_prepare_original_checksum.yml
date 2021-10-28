@@ -8,4 +8,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Dummy step
-        run: echo "Nothing to do"thing to do"
+        run: echo "Nothing to do"
