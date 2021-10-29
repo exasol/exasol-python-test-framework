@@ -23,7 +23,7 @@ install_requires = \
 
 setup_kwargs = {
     'name': 'exasol-python-test-framework',
-    'version': '0.1.0',
+    'version': '0.2.0',
     'description': 'Python Test framework for Exasol database tests',
     'long_description': '# Exasol Python Test Framework\n\n## About\n\nThis project is shared among other Exasol projects, and provides a test framework to execute integration tests on the database. \n\n\n## Prerequisites\n\n* Python3\n\n',
     'author': 'Exasol AG',
@@ -34,7 +34,7 @@ setup_kwargs = {
     'packages': packages,
     'package_data': package_data,
     'install_requires': install_requires,
-    'python_requires': '>=3.6',
+    'python_requires': '>=3.6,<4',
 }
 
 
