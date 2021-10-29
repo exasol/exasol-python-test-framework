@@ -134,7 +134,7 @@ test = ["websockets"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.6,<4"
-content-hash = "95663238c43966136c0a24d700884884dc1bce1997cf075370a89c4a24f7a52a"
+content-hash = "46ec70f4e4889541fa1bd5db0f1c6cd320375aec5a307208fa3218fa779c341b"
 
 [metadata.files]
 certifi = [

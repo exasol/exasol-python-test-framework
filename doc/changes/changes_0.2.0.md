@@ -30,4 +30,4 @@ n/a
 ### Compile Dependency Updates
 
 * Updated `python >=3.6,<4`
-* Added `urllib3 >=1.26.7`
+
