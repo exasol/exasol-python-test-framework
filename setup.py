@@ -19,7 +19,8 @@ install_requires = \
  'numpy==1.19.5',
  'pyftpdlib>=1.5.6',
  'pyodbc>=4.0.27',
- 'scipy==1.2.1']
+ 'scipy==1.2.1',
+ 'urllib3>=1.26.7']
 
 setup_kwargs = {
     'name': 'exasol-python-test-framework',
@@ -34,7 +35,7 @@ setup_kwargs = {
     'packages': packages,
     'package_data': package_data,
     'install_requires': install_requires,
-    'python_requires': '>=3.6',
+    'python_requires': '>=3.6,<4',
 }
 
 
