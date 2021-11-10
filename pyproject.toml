@@ -23,7 +23,7 @@ exclude = ["lang"]
 [tool.poetry.dependencies]
 python = ">=3.6,<4"
 pyodbc = ">=4.0.27"
-numpy = "1.19.5"
-scipy = "1.2.1"
+numpy = ">=1.19.5"
+scipy = ">=1.2.1"
 docker = ">=5.0.3"
 pyftpdlib = ">=1.5.6"
