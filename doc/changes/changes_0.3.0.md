@@ -1,4 +1,4 @@
-# Exasol Python Test Framework 0.3.0, released 2021-12-20
+# Exasol Python Test Framework 0.3.0, released t.b.d.
  
 Code name: t.b.d.
 
