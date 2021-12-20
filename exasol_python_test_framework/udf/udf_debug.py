@@ -11,7 +11,7 @@ from queue import Full
 from threading import Thread
 from typing import Optional, Tuple
 
-from exasol_python_test_framework import udf
+from exasol_python_test_framework import udf, docker_db_environment
 
 
 class LogServer(asyncore.dispatcher):
@@ -39,13 +39,13 @@ class LogServer(asyncore.dispatcher):
 class LogHandler(asynchat.async_chat):
     def __init__(self, sock, address: Tuple, output: Queue):
         asynchat.async_chat.__init__(self, sock=sock)
-        self.set_terminator("\n")
+        self.set_terminator(b"\n")
         self.address = "%s:%d" % address
         self.output = output
         self.ibuffer = []
 
     def collect_incoming_data(self, data):
-        self.ibuffer.append(data)
+        self.ibuffer.append(data.decode('utf-8'))
 
     def found_terminator(self):
         try:
@@ -100,13 +100,18 @@ def output_service(queue: Queue, server: Optional[str], port: Optional[int]):
         sys.stdout.flush()
 
 
-def start_udf_output_redirect_consumer(test_case: udf.TestCase, output: io.TextIOBase):
-    hostname = socket.gethostname()
-    local_ip = socket.gethostbyname(hostname)
+def start_udf_output_redirect_consumer(test_case: udf.TestCase, server: Optional[str], output: io.TextIOBase):
+    if server is None:
+        hostname = socket.gethostname()
+        local_ip = socket.gethostbyname(hostname)
+    else:
+        local_ip = server
     print("local_ip", local_ip)
 
+    PORT = 3000
+
     queue = Queue()
-    process = Process(target=output_service, args=(queue, None, None))
+    process = Process(target=output_service, args=(queue, local_ip, PORT))
     process.start()
 
     def print_stdout():
@@ -116,14 +121,13 @@ def start_udf_output_redirect_consumer(test_case: udf.TestCase, output: io.TextI
                 output.write(f"UDF DEBUG {msg}\n")
             except:
                 traceback.print_exc()
-                pass
         queue.close()
 
     stdout_thread = threading.Thread(target=print_stdout)
     stdout_thread.start()
     time.sleep(10)
     if process.is_alive():
-        test_case.query("ALTER SESSION SET SCRIPT_OUTPUT_ADDRESS='%s:3000';" % local_ip)
+        test_case.query(f"ALTER SESSION SET SCRIPT_OUTPUT_ADDRESS='{local_ip}:{PORT}';")
         return process, queue
     else:
         if not queue.empty():
@@ -133,20 +137,32 @@ def start_udf_output_redirect_consumer(test_case: udf.TestCase, output: io.TextI
 
 
 class UdfDebugger:
-    def __init__(self, test_case: udf.TestCase, output: io.TextIOBase = sys.stdout):
+    def __init__(self, test_case: udf.TestCase,
+                 server: Optional[str] = None, output: Optional[io.TextIOBase] = sys.stdout):
         self.output = output
         self.test_case = test_case
+        self.server = server
 
     def __enter__(self):
-        self._process, self._queue = start_udf_output_redirect_consumer(self.test_case, self.output)
+        self._process, self._queue = start_udf_output_redirect_consumer(test_case=self.test_case,
+                                                                        server=self.server, output=self.output)
 
     def __exit__(self, type_, value, traceback):
         if self._process is not None:
-            # Wait 1s to give socket time to process all remaining messages
             time.sleep(1)
             self._process.terminate()
-            print("Calling terminate")
+            # Wait 1s to give socket time to process all remaining messages
+            time.sleep(1)
             self._queue.put("Completed")
 
         self._process = None
         self._queue = None
+
+
+class UdfDebuggerFromDockerHost(UdfDebugger):
+
+    def __init__(self, test_case: udf.TestCase, output: Optional[io.TextIOBase] = sys.stdout):
+        env = docker_db_environment.DockerDBEnvironment("")
+        super().__init__(test_case=test_case, server=env.get_ip_address_of_host(), output=output)
+
+

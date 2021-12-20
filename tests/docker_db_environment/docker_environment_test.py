@@ -1,9 +1,3 @@
-#!/usr/bin/env python3
-
-import os
-import sys
-
-
 from exasol_python_test_framework import udf
 from exasol_python_test_framework import docker_db_environment
 
@@ -40,6 +34,7 @@ class DockerDBEnvironmentTest(udf.TestCase):
                 env.close()
             except:
                 pass
+
 
 if __name__ == '__main__':
     udf.main()
