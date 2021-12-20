@@ -58,6 +58,7 @@ fi
 
 
 SCRIPT_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
-run_tests_in_folder "$SCRIPT_DIR/exatest" "$server" "$odbc_driver"
-run_tests_in_folder "$SCRIPT_DIR/udf" "$server" "$odbc_driver" --lang foo --lang-path "$SCRIPT_DIR/udf/lang"
-run_tests_in_folder "$SCRIPT_DIR/docker_db_environment" "$server" "$odbc_driver"
+TEST_DIR="$SCRIPT_DIR/../../tests"
+run_tests_in_folder "$TEST_DIR/exatest" "$server" "$odbc_driver"
+run_tests_in_folder "$TEST_DIR/udf" "$server" "$odbc_driver" --lang foo --lang-path "$TEST_DIR/udf/lang"
+run_tests_in_folder "$TEST_DIR/docker_db_environment" "$server" "$odbc_driver"
