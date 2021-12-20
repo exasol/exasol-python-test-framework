@@ -13,7 +13,7 @@ init_poetry
 
 if [ -n "$POETRY_BIN" ]
 then
-  PYTHONPATH=. $POETRY_BIN run $SCRIPT_DIR/../../tests/run_locally.sh --server "$1" --odbc-driver="$2"
+  PYTHONPATH=. $POETRY_BIN run $SCRIPT_DIR/run_locally.sh --server "$1" --odbc-driver="$2"
 else
   echo "Could not find poetry!"
   exit 1
