@@ -115,7 +115,8 @@ def start_udf_output_redirect_consumer(test_case: udf.TestCase, server: Optional
     process.start()
 
     def print_stdout():
-        while process.is_alive():
+        t = threading.currentThread()
+        while getattr(t, "keep_going", True):
             try:
                 msg = queue.get()
                 output.write(f"UDF DEBUG {msg}\n")
@@ -128,10 +129,9 @@ def start_udf_output_redirect_consumer(test_case: udf.TestCase, server: Optional
     time.sleep(10)
     if process.is_alive():
         test_case.query(f"ALTER SESSION SET SCRIPT_OUTPUT_ADDRESS='{local_ip}:{PORT}';")
-        return process, queue
+        return process, queue, stdout_thread
     else:
-        if not queue.empty():
-            print(f"UDF debug std output '{queue.get_nowait()}'")
+        stdout_thread.keep_going = False
         queue.put("Cancel") # Send message to cancel stdout_thread
         test_case.fail("Could not start udf_debug.py")
 
@@ -144,15 +144,16 @@ class UdfDebugger:
         self.server = server
 
     def __enter__(self):
-        self._process, self._queue = start_udf_output_redirect_consumer(test_case=self.test_case,
-                                                                        server=self.server, output=self.output)
+        self._process, self._queue, self._stdout_thread = \
+            start_udf_output_redirect_consumer(test_case=self.test_case,
+                                               server=self.server, output=self.output)
 
     def __exit__(self, type_, value, traceback):
         if self._process is not None:
-            time.sleep(1)
+
             self._process.terminate()
             # Wait 1s to give socket time to process all remaining messages
-            time.sleep(1)
+            self._stdout_thread.keep_going = False
             self._queue.put("Completed")
 
         self._process = None
