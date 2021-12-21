@@ -1,8 +1,10 @@
 import os
 
+
 def is_docker_available():
     path = "/var/run/docker.sock"
     return os.path.exists(path) and os.access(path, os.W_OK)
+
 
 def get_docker_client():
     if is_docker_available():
@@ -12,23 +14,29 @@ def get_docker_client():
     else:
         raise Exception("Docker not available")
 
+
 def get_environment_type():
     return os.environ["TEST_ENVIRONMENT_TYPE"]
+
 
 def get_environment_name():
     return os.environ["TEST_ENVIRONMENT_NAME"]
 
+
 def get_db_container_name():
     return os.environ["TEST_DOCKER_DB_CONTAINER_NAME"]
+
 
 def get_docker_network_name():
     return os.environ["TEST_DOCKER_NETWORK_NAME"]
 
+
 def is_available():
-    return  is_docker_available() and \
-            get_environment_type() == "docker_db" and \
-            get_db_container_name is not None and \
-            get_docker_network_name() is not None
+    return is_docker_available() and \
+           get_environment_type() == "docker_db" and \
+           get_db_container_name is not None and \
+           get_docker_network_name() is not None
+
 
 class DockerDBEnvironment:
     
@@ -57,7 +65,7 @@ class DockerDBEnvironment:
 
     def remove_started_container(self, container):
         try:
-            container.remove(v=True,force=True)
+            container.remove(v=True, force=True)
         except:
             pass
         self._started_containers.remove(containers)
@@ -99,3 +107,6 @@ class DockerDBEnvironment:
             return container.attrs['NetworkSettings']['Networks'][get_docker_network_name()]['IPAddress']
         else:
             raise Exception("Container not found in started containers")
+
+    def get_ip_address_of_host(self):
+        return self._client.networks.get(get_docker_network_name()).attrs['IPAM']['Config'][0]['Gateway']

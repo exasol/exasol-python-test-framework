@@ -27,7 +27,7 @@ jobs:
       - name: Install Poetry
         uses: abatilo/actions-poetry@v2.0.0
       - name: Run all tests
-        run: ./run_all_tests.sh "localhost:8888" ../downloads/ODBC/lib/linux/x86_64/libexaodbc-uo2214lv2.so
+        run: ./scripts/test/run_all_tests.sh "localhost:8888" ../downloads/ODBC/lib/linux/x86_64/libexaodbc-uo2214lv2.so
         env:
           EXAPLUS: ../downloads/EXAPLUS
           TEST_DOCKER_NETWORK_NAME: db_network_test
