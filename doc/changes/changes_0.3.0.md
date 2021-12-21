@@ -1,10 +1,10 @@
-# Exasol Python Test Framework 0.3.0, released t.b.d.
+# Exasol Python Test Framework 0.3.0, released 2021-12-21
  
-Code name: t.b.d.
+Code name: Udf Debug log
 
 ## Summary
 
-t.b.d.
+This release added the UDF Debug log redirection feature, which allows tests to read logs to stdout/stderr inside UDFs.
 
 ## Features
 
@@ -16,7 +16,7 @@ n/a
 
 ## Documentation
 
-n/a
+ - #27: Prepared release 0.3.0
 
 ## Refactoring
 
