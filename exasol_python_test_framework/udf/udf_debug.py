@@ -76,13 +76,13 @@ class ScriptOutputThread(Thread):
 def output_service(queue: Queue, server: Optional[str], port: Optional[int]):
     """Start a standalone output service
 
-    This service can be used in an other Python or R instance, for
+    This service can be used in another Python or R instance, for
     Python instances the connection parameter externalClient need to
     be specified.
     """
     try:
         host = socket.gethostbyname(socket.gethostname())
-    except:
+    except Exception:
         host = '0.0.0.0'
 
     if server is None:
@@ -108,10 +108,10 @@ def start_udf_output_redirect_consumer(test_case: udf.TestCase, server: Optional
         local_ip = server
     print("local_ip", local_ip)
 
-    PORT = 3000
+    port = 3000
 
     queue = Queue()
-    process = Process(target=output_service, args=(queue, local_ip, PORT))
+    process = Process(target=output_service, args=(queue, local_ip, port))
     process.start()
 
     def print_stdout():
@@ -120,7 +120,7 @@ def start_udf_output_redirect_consumer(test_case: udf.TestCase, server: Optional
             try:
                 msg = queue.get()
                 output.write(f"UDF DEBUG {msg}\n")
-            except:
+            except Exception:
                 traceback.print_exc()
         queue.close()
 
@@ -128,11 +128,11 @@ def start_udf_output_redirect_consumer(test_case: udf.TestCase, server: Optional
     stdout_thread.start()
     time.sleep(10)
     if process.is_alive():
-        test_case.query(f"ALTER SESSION SET SCRIPT_OUTPUT_ADDRESS='{local_ip}:{PORT}';")
+        test_case.query(f"ALTER SESSION SET SCRIPT_OUTPUT_ADDRESS='{local_ip}:{port}';")
         return process, queue, stdout_thread
     else:
         stdout_thread.keep_going = False
-        queue.put("Cancel") # Send message to cancel stdout_thread
+        queue.put("Cancel")  # Send message to cancel stdout_thread
         test_case.fail("Could not start udf_debug.py")
 
 
@@ -148,9 +148,8 @@ class UdfDebugger:
             start_udf_output_redirect_consumer(test_case=self.test_case,
                                                server=self.server, output=self.output)
 
-    def __exit__(self, type_, value, traceback):
+    def __exit__(self, type_, value, trace_back):
         if self._process is not None:
-
             self._process.terminate()
             # Wait 1s to give socket time to process all remaining messages
             self._stdout_thread.keep_going = False
@@ -165,5 +164,3 @@ class UdfDebuggerFromDockerHost(UdfDebugger):
     def __init__(self, test_case: udf.TestCase, output: Optional[io.TextIOBase] = sys.stdout):
         env = docker_db_environment.DockerDBEnvironment("")
         super().__init__(test_case=test_case, server=env.get_ip_address_of_host(), output=output)
-
-
