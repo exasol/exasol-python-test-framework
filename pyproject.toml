@@ -25,7 +25,9 @@ python = ">=3.6,<4"
 pyodbc = ">=4.0.27"
 numpy = ">=1.19.5"
 scipy = ">=1.2.1"
-docker = ">=5.0.3"
+# The `sys_platform` marker makes sure the docker dependency is only installed on
+# non windows platforms.
+docker = { version = ">=5.0.3", markers = "sys_platform != 'win32'"}
 pyftpdlib = ">=1.5.6"
 
 [tool.poetry.dev-dependencies]
