@@ -7,11 +7,7 @@ TBD
 
 ## Features
 
- - #24: Added Script Output Redirect to Test Framework 
-
 ## Bugs
-
-n/a
 
 ## Documentation
 
