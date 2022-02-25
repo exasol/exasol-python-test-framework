@@ -15,17 +15,16 @@ package_data = \
 {'': ['*']}
 
 install_requires = \
-['docker>=5.0.3',
- 'numpy>=1.19.5',
- 'pyftpdlib>=1.5.6',
- 'pyodbc>=4.0.27',
- 'scipy>=1.2.1']
+['numpy>=1.19.5', 'pyftpdlib>=1.5.6', 'pyodbc>=4.0.27', 'scipy>=1.2.1']
+
+extras_require = \
+{':sys_platform != "win32"': ['docker>=5.0.3']}
 
 setup_kwargs = {
     'name': 'exasol-python-test-framework',
     'version': '0.3.0',
     'description': 'Python Test framework for Exasol database tests',
-    'long_description': '# Exasol Python Test Framework\n\n## About\n\nThis project is shared among other Exasol projects, and provides a test framework to execute integration tests on the database. \n\n\n## Prerequisites\n\n* Python3\n\n',
+    'long_description': '# Exasol Python Test Framework\n\n## About\n\nThis project is shared among other Exasol projects, and provides a test framework to execute integration tests on the database. \n\n\n## Prerequisites\n\n* Linux, MacOs\n* Python3\n\n### On Linux\n\n * providers (packages) of unixodbc and unixodbc-development artifacts\n\n',
     'author': 'Exasol AG',
     'author_email': 'opensource@exasol.com',
     'maintainer': None,
@@ -34,6 +33,7 @@ setup_kwargs = {
     'packages': packages,
     'package_data': package_data,
     'install_requires': install_requires,
+    'extras_require': extras_require,
     'python_requires': '>=3.6,<4',
 }
 
