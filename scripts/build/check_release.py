@@ -39,7 +39,7 @@ if __name__ == '__main__':
     print(f'Current version: "{poetry_version}"')
     print(f'Latest git tag: "{latest_tag}"')
 
-    # We expect that the current version in pyproject.toml is alway greater than the latest tag.
+    # We expect that the current version in pyproject.toml is always greater than the latest tag.
     # Thus we avoid creating a release without having the version number updated.
     if poetry_version == latest_tag:
         raise ValueError("Poetry version needs to be updated!")

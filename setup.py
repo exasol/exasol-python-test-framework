@@ -22,7 +22,7 @@ extras_require = \
 
 setup_kwargs = {
     'name': 'exasol-python-test-framework',
-    'version': '0.3.0',
+    'version': '0.4.0',
     'description': 'Python Test framework for Exasol database tests',
     'long_description': '# Exasol Python Test Framework\n\n## About\n\nThis project is shared among other Exasol projects, and provides a test framework to execute integration tests on the database. \n\n\n## Prerequisites\n\n* Linux, MacOs\n* Python3\n\n### On Linux\n\n * providers (packages) of unixodbc and unixodbc-development artifacts\n\n',
     'author': 'Exasol AG',
