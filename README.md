@@ -7,5 +7,10 @@ This project is shared among other Exasol projects, and provides a test framewor
 
 ## Prerequisites
 
+* Linux, MacOs
 * Python3
+
+### On Linux
+
+ * providers (packages) of unixodbc and unixodbc-development artifacts
 
