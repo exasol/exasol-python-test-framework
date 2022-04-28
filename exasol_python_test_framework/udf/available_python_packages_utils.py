@@ -1,6 +1,7 @@
+import textwrap
 
 def run_python_package_import_test(test_case, pkg, fail=False, alternative=None):
-    sql=udf.fixindent('''
+    sql=textwrap.dedent('''
         CREATE OR REPLACE PYTHON3 SCALAR SCRIPT available_packages.test_import_of_package() returns VARCHAR(2000000) AS
         
         def run(ctx):
