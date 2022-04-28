@@ -1,8 +1,8 @@
 import textwrap
 
-def run_python_package_import_test(test_case, pkg, fail=False, alternative=None):
+def run_python_package_import_test(test_case, pkg, language_alias, fail=False, alternative=None):
     sql=textwrap.dedent('''
-        CREATE OR REPLACE PYTHON3 SCALAR SCRIPT available_packages.test_import_of_package() returns VARCHAR(2000000) AS
+        CREATE OR REPLACE %s SCALAR SCRIPT available_packages.test_import_of_package() returns VARCHAR(2000000) AS
         
         def run(ctx):
             try:
@@ -12,7 +12,7 @@ def run_python_package_import_test(test_case, pkg, fail=False, alternative=None)
                 return traceback.format_exc()
             return None
         /
-        ''' % (pkg))
+        ''' % (language_alias, pkg))
     print(sql)
     test_case.query(sql)
     try:
