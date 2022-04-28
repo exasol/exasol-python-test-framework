@@ -25,6 +25,6 @@ def run_python_package_import_test(test_case, pkg, language_alias, fail=False, a
         if fail:
             return
         if alternative:
-            run_python_package_import_test(test_case, alternative,fail)
+            run_python_package_import_test(test_case, alternative, language_alias, fail)
         else:
             raise
