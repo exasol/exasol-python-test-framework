@@ -13,14 +13,13 @@ def run_python_package_import_test(test_case, schema, language_alias, pkg, fail=
             return None
         /
         ''')
-    print(sql)
     test_case.query(sql)
     try:
         rows = test_case.query(f'''SELECT {schema}.test_import_of_package() FROM dual''')
         if not fail:
             test_case.assertRowsEqual([(None,)], rows)
         else:
-            assert 'Expected Failure' == 'not found'
+            test_case.fail('Failure was expected')
     except:
         if fail:
             return
