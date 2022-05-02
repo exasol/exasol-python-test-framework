@@ -1,6 +1,6 @@
 import textwrap
 
-def run_python_package_import_test(test_case, schema, language_alias, pkg, language_alias, fail=False, alternative=None):
+def run_python_package_import_test(test_case, schema, language_alias, pkg, fail=False, alternative=None):
     sql=textwrap.dedent(f'''
         CREATE OR REPLACE {language_alias} SCALAR SCRIPT {schema}.test_import_of_package() returns VARCHAR(2000000) AS
         
