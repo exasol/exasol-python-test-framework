@@ -14,14 +14,14 @@ class AvailablePackageTest(udf.TestCase):
         run_python_package_import_test(self, self.SCHEMA, "PYTHON3", "pandas", fail=False, alternative=None)
 
     def test_package_not_available_expected(self):
-        run_python_package_import_test(self, self.SCHEMA, "PYTHON3", "asdgkdbalgf", fail=True, alternative=None)
+        run_python_package_import_test(self, self.SCHEMA, "PYTHON3", "NOT_INSTALLED_PACKAGE", fail=True, alternative=None)
 
     @unittest.expectedFailure
     def test_package_not_available_not_expected(self):
-        run_python_package_import_test(self, self.SCHEMA, "PYTHON3", "asdgkdbalgf", fail=False, alternative=None)
+        run_python_package_import_test(self, self.SCHEMA, "PYTHON3", "NOT_INSTALLED_PACKAGE", fail=False, alternative=None)
 
     def test_package_not_available_alternative(self):
-        run_python_package_import_test(self, self.SCHEMA, "PYTHON3", "asdgkdbalgf", fail=False, alternative="pandas")
+        run_python_package_import_test(self, self.SCHEMA, "PYTHON3", "NOT_INSTALLED_PACKAGE", fail=False, alternative="pandas")
 
 if __name__ == '__main__':
     udf.main()
