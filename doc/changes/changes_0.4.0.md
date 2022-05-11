@@ -12,6 +12,7 @@ TBD
 ## Documentation
 
 ## Refactoring
+ - #37: Update minimal python version to 3.8
 
 ## Security
  - #30: Fix CVE 2021 32559 URLLib3

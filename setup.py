@@ -15,7 +15,7 @@ package_data = \
 {'': ['*']}
 
 install_requires = \
-['numpy>=1.19.5', 'pyftpdlib>=1.5.6', 'pyodbc>=4.0.27', 'scipy>=1.2.1']
+['numpy>=1.22', 'pyftpdlib>=1.5.6', 'pyodbc>=4.0.27', 'scipy>=1.7.0,<2.0.0']
 
 extras_require = \
 {':sys_platform != "win32"': ['docker>=5.0.3']}
@@ -34,7 +34,7 @@ setup_kwargs = {
     'package_data': package_data,
     'install_requires': install_requires,
     'extras_require': extras_require,
-    'python_requires': '>=3.6,<4',
+    'python_requires': '>=3.8,<3.11',
 }
 
 
