@@ -4,7 +4,7 @@ Code name: Python 3.8 and implemented available package check for Python.
 
 ## Summary
 
-This release upgrades to Python 3.8 as minimum Python version. Also, it includes a new utilitu UDF which checks if specific Python packages are installed.
+This release upgrades to Python 3.8 as minimum Python version. Also, it includes a new utility function which checks if specific Python packages is installed in the UDF environment.
 Besides this, it includes a minor security fix.
 
 ## Features
