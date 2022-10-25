@@ -22,6 +22,8 @@ jobs:
         uses: abatilo/actions-poetry@v2.1.6
         with:
           poetry-version: 1.2.1
+      - name: Install dependencies
+        run: poetry install
       - name: Spawn EXASOL environemnt
         run: poetry run python3 -m exasol_integration_test_docker_environment.main spawn-test-environment --environment-name test --database-port-forward 8888 --bucketfs-forward 6666
       - name: Run all tests

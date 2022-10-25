@@ -44,12 +44,14 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.8
-      - name: Spawn EXASOL environemnt
-        run: poetry run python3 -m exasol_integration_test_docker_environment.main spawn-test-environment --environment-name test --database-port-forward 8888 --bucketfs-forward 6666
       - name: Install Poetry
         uses: abatilo/actions-poetry@v2.1.6
         with:
           poetry-version: 1.2.1
+      - name: Install dependencies
+        run: poetry install
+      - name: Spawn EXASOL environemnt
+        run: poetry run python3 -m exasol_integration_test_docker_environment.main spawn-test-environment --environment-name test --database-port-forward 8888 --bucketfs-forward 6666
       - name: Run all tests
         run: ./scripts/test/run_all_tests.sh "localhost:8888" ../downloads/ODBC/lib/linux/x86_64/libexaodbc-uo2214lv2.so
         env:
