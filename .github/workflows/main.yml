@@ -25,7 +25,9 @@ jobs:
         with:
           python-version: 3.8
       - name: Install Poetry
-        uses: abatilo/actions-poetry@v2.1.4
+        uses: abatilo/actions-poetry@v2.1.6
+        with:
+          poetry-version: 1.2.1
       - name: Run all tests
         run: ./scripts/test/run_all_tests.sh "localhost:8888" ../downloads/ODBC/lib/linux/x86_64/libexaodbc-uo2214lv2.so
         env:
