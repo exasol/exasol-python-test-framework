@@ -25,7 +25,7 @@ jobs:
       - name: Install dependencies
         run: poetry install
       - name: Spawn EXASOL environemnt
-        run: poetry run python3 -m exasol_integration_test_docker_environment.main spawn-test-environment --environment-name test --database-port-forward 8888 --bucketfs-forward 6666
+        run: poetry run python3 -m exasol_integration_test_docker_environment.main spawn-test-environment --environment-name test --database-port-forward 8888 --bucketfs-port-forward 6666
       - name: Run all tests
         run: ./scripts/test/run_all_tests.sh "localhost:8888" ../downloads/ODBC/lib/linux/x86_64/libexaodbc-uo2214lv2.so
         env:
