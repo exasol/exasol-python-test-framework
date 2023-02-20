@@ -22,7 +22,16 @@ Code name:
 
 ## Security
 
- n/a
+⚠️ Attention ⚠️
+
+  Security vulnerabilities have been addressed, hence we advise users of
+  our library to update and check the security of their own dependency tree.
+  E.g. by using a vulnerability scanner like [trivy](https://aquasecurity.github.io/trivy/v0.17.2/).
+
+* Updated dependencies to address security issue (internal: poetry.lock)
+  * CVE-2022-23491
+  * CVE-2022-40897
+  * CVE-2022-24439
 
 ## Dependency updates
 
