@@ -6,18 +6,18 @@ jobs:
   check-version-numbers:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Setup Python 3.8
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: 3.8
 
       - name: Install Poetry
-        uses: abatilo/actions-poetry@v2.1.6
+        uses: abatilo/actions-poetry@v3
         with:
-          poetry-version: 1.2.1
+          poetry-version: 1.3
 
       - name: Check Release
         run: ./scripts/build/check_release.sh
