@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Get ODBC driver
         run: |
           bash .github/workflows/scripts/download_odbc_driver.sh "$(pwd)/.."
@@ -15,13 +15,13 @@ jobs:
         run: |
           bash .github/workflows/scripts/download_exaplus.sh "$(pwd)/.."
       - name: Setup Python 3.8 for integration-test-docker-environment
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: 3.8
       - name: Install Poetry
-        uses: abatilo/actions-poetry@v2.1.6
+        uses: abatilo/actions-poetry@v3
         with:
-          poetry-version: 1.2.1
+          poetry-version: 1.3
       - name: Install dependencies
         run: poetry install
       - name: Spawn EXASOL environemnt
