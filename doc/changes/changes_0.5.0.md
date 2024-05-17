@@ -18,7 +18,7 @@ Code name:
 
 ## Refactoring
 
- n/a
+  - #56: Updated to Python 3.10
 
 ## Security
 
