@@ -26,9 +26,6 @@ jobs:
         run: |
           poetry run python3 -m exasol_integration_test_docker_environment.main spawn-test-environment --environment-name test --database-port-forward 8888 --bucketfs-port-forward 6666
           sleep 120 # wait for SLC to be unpacked
-      - name: Show docker networks
-        run: |
-          docker network ls
       - name: Run all tests
         run: ./scripts/test/run_all_tests.sh "localhost:8888" ../downloads/ODBC/lib/linux/x86_64/libexaodbc-uo2214lv2.so
         env:
