@@ -17,7 +17,10 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Python & Poetry Environment
-        uses: ./.github/actions/prepare_poetry_env
+        uses: exasol/python-toolbox/.github/actions/python-environment@0.12.0
+        with:
+          python-version: '3.10'
+          poetry-version: '1.8.2'
 
       - name: Check Release
         run: ./scripts/build/check_release.sh
@@ -37,9 +40,10 @@ jobs:
         run: |
           bash .github/workflows/scripts/download_exaplus.sh "$(pwd)/.."
       - name: Setup Python & Poetry Environment
-        uses: ./.github/actions/prepare_poetry_env
+        uses: exasol/python-toolbox/.github/actions/python-environment@0.12.0
         with:
           python-version: ${{ matrix.python-version }}
+          poetry-version: '1.8.2'
       - name: Spawn EXASOL environemnt
         run: |
           poetry run python3 -m exasol_integration_test_docker_environment.main spawn-test-environment --environment-name test --database-port-forward 8888 --bucketfs-port-forward 6666
@@ -57,7 +61,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python & Poetry Environment
-        uses: ./.github/actions/prepare_poetry_env
+        uses: exasol/python-toolbox/.github/actions/python-environment@0.12.0
+        with:
+          python-version: '3.10'
+          poetry-version: '1.8.2'
       - name: Build Release
         run: |
           bash ./scripts/build/build_release.sh
