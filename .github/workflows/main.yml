@@ -22,6 +22,10 @@ jobs:
         uses: ./.github/actions/prepare_poetry_env
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Check Poetry version
+        run: poetry --version
+      - name: Check Python version
+        run: poetry run python3 --version
       - name: Spawn EXASOL environemnt
         run: |
           poetry run python3 -m exasol_integration_test_docker_environment.main spawn-test-environment --environment-name test --database-port-forward 8888 --bucketfs-port-forward 6666
