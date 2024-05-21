@@ -1,14 +1,6 @@
 import sys
 import pyodbc
 
-# Check the pyodbc version
-try:
-    major, minor, patch = map(int, pyodbc.version.split('.'))
-    if major != 4 or (minor, patch) < (0, 27):
-        raise ImportError('pyodbc version >= 4.0.27 required. Try running `pip3 install --user --force pyodbc`.')
-except ValueError:  # The version number is not a number...
-    raise ImportError('pyodbc version >= 4.0.27 required. Try running `pip3 install --user --force pyodbc`.')
-
 
 class ClientError(Exception):
     pass

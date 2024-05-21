@@ -115,7 +115,7 @@ def start_udf_output_redirect_consumer(test_case: udf.TestCase, server: Optional
     process.start()
 
     def print_stdout():
-        t = threading.currentThread()
+        t = threading.current_thread()
         while getattr(t, "keep_going", True):
             try:
                 msg = queue.get()
