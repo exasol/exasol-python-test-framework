@@ -8,13 +8,13 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Install poetry
+      run: pipx install poetry==1.8.2
+      shell: bash
     - uses: actions/setup-python@v5
       with:
         python-version: ${{ inputs.python-version }}
         cache: 'poetry'
-    - uses: abatilo/actions-poetry@v3
-      with:
-        poetry-version: 1.8.2
     - name: Poetry install
       run: poetry install
       shell: bash
