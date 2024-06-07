@@ -21,7 +21,7 @@ exclude = ["lang"]
 
 
 [tool.poetry.dependencies]
-python = ">=3.10,<4"
+python = ">=3.10,<3.12"
 pyodbc = "^5.1.0"
 numpy = ">=1.26"
 scipy = "^1.13.0"
