@@ -56,7 +56,7 @@ class ClientSetup(object):
             tmp.write('EXAPWD = %s\n' % password)
             tmp.write('CONNECTIONLCCTYPE = en_US.UTF-8\n')      # TODO Maybe make this optional
             tmp.write('CONNECTIONLCNUMERIC = en_US.UTF-8\n')
-            tmp.write('SSLCertificate = SSL_VERIFY_NONE\n')
+            tmp.write('SSLCERTIFICATE = SSL_VERIFY_NONE\n')
             if odbc_log != 'off':
                 tmp.write('EXALOGFILE = %s/exaodbc.log\n' % log_path.logdir)
                 tmp.write('LOGMODE = %s\n' % {
