@@ -165,8 +165,14 @@ class ConditionalTestCaseTest(unittest.TestCase):
                 def test_3(self): pass
 
         with selftest(Module) as result:
-            self.assertIn('\ntest_2 (__main__.ConditionalTestCaseTest.test_expectedFailure_tests.<locals>.Module.Test) ... expected failure', result.output)
-            self.assertIn('\ntest_3 (__main__.ConditionalTestCaseTest.test_expectedFailure_tests.<locals>.Module.Test) ... unexpected success', result.output)
+            expected_out_python3_10_and_before = "\ntest_2 (__main__.ConditionalTestCaseTest.test_expectedFailure_tests.<locals>.Module.Test) ... expected failure"
+            expected_out_python3_11_and_later = "\ntest_2 (__main__.ConditionalTestCaseTest.test_expectedFailure_tests.<locals>.Module.Test.test_2) ... expected failure"
+            if expected_out_python3_10_and_before not in result.output and expected_out_python3_11_and_later not in result.output:
+                self.fail("Did not find expected output.")
+            expected_out_python3_10_and_before = "\ntest_3 (__main__.ConditionalTestCaseTest.test_expectedFailure_tests.<locals>.Module.Test) ... unexpected success"
+            expected_out_python3_11_and_later = "\ntest_3 (__main__.ConditionalTestCaseTest.test_expectedFailure_tests.<locals>.Module.Test.test_3) ... unexpected success"
+            if expected_out_python3_10_and_before not in result.output and expected_out_python3_11_and_later not in result.output:
+                self.fail("Did not find expected output.")
             self.assertEqual(1, len(result.expectedFailures))
             self.assertEqual(1, len(result.unexpectedSuccesses))
 
@@ -180,8 +186,14 @@ class ConditionalTestCaseTest(unittest.TestCase):
                 def test_3(self): pass
 
         with selftest(Module) as result:
-            self.assertIn('\ntest_2 (__main__.ConditionalTestCaseTest.test_expectedFailureIf_True_tests.<locals>.Module.Test) ... expected failure', result.output)
-            self.assertIn('\ntest_3 (__main__.ConditionalTestCaseTest.test_expectedFailureIf_True_tests.<locals>.Module.Test) ... unexpected success', result.output)
+            expected_out_python3_10_and_before = "\ntest_2 (__main__.ConditionalTestCaseTest.test_expectedFailureIf_True_tests.<locals>.Module.Test) ... expected failure"
+            expected_out_python3_11_and_later = "\ntest_2 (__main__.ConditionalTestCaseTest.test_expectedFailureIf_True_tests.<locals>.Module.Test.test_2) ... expected failure"
+            if expected_out_python3_10_and_before not in result.output and expected_out_python3_11_and_later not in result.output:
+                self.fail("Did not find expected output.")
+            expected_out_python3_10_and_before = "\ntest_3 (__main__.ConditionalTestCaseTest.test_expectedFailureIf_True_tests.<locals>.Module.Test) ... unexpected success"
+            expected_out_python3_11_and_later = "\ntest_3 (__main__.ConditionalTestCaseTest.test_expectedFailureIf_True_tests.<locals>.Module.Test.test_3) ... unexpected success"
+            if expected_out_python3_10_and_before not in result.output and expected_out_python3_11_and_later not in result.output:
+                self.fail("Did not find expected output.")
             self.assertEqual(1, len(result.expectedFailures))
             self.assertEqual(1, len(result.unexpectedSuccesses))
 
@@ -195,8 +207,14 @@ class ConditionalTestCaseTest(unittest.TestCase):
                 def test_3(self): pass
 
         with selftest(Module) as result:
-            self.assertIn('\ntest_2 (__main__.ConditionalTestCaseTest.test_expectedFailureIf_False_tests.<locals>.Module.Test) ... FAIL', result.output)
-            self.assertIn('\ntest_3 (__main__.ConditionalTestCaseTest.test_expectedFailureIf_False_tests.<locals>.Module.Test) ... ok', result.output)
+            expected_out_python3_10_and_before = "\ntest_2 (__main__.ConditionalTestCaseTest.test_expectedFailureIf_False_tests.<locals>.Module.Test) ... FAIL"
+            expected_out_python3_11_and_later = "\ntest_2 (__main__.ConditionalTestCaseTest.test_expectedFailureIf_False_tests.<locals>.Module.Test.test_2) ... FAIL"
+            if expected_out_python3_10_and_before not in result.output and expected_out_python3_11_and_later not in result.output:
+                self.fail("Did not find expected output.")
+            expected_out_python3_10_and_before = "\ntest_3 (__main__.ConditionalTestCaseTest.test_expectedFailureIf_False_tests.<locals>.Module.Test) ... ok"
+            expected_out_python3_11_and_later = "\ntest_3 (__main__.ConditionalTestCaseTest.test_expectedFailureIf_False_tests.<locals>.Module.Test.test_3) ... ok"
+            if expected_out_python3_10_and_before not in result.output and expected_out_python3_11_and_later not in result.output:
+                self.fail("Did not find expected output.")
             self.assertEqual(1, len(result.failures))
             self.assertEqual(0, len(result.expectedFailures))
             self.assertEqual(0, len(result.unexpectedSuccesses))

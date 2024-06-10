@@ -32,6 +32,3 @@ class UdfDebugTest(udf.TestCase):
 
 if __name__ == '__main__':
     udf.main()
-
-
-

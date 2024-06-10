@@ -23,14 +23,14 @@ jobs:
           poetry-version: '1.8.2'
 
       - name: Check Release
-        run: ./scripts/build/check_release.sh
+        run: poetry run python3 -u scripts/build/check_release.py
 
   integration-tests:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.10', '3.11', '3.12']
+        python-version: ['3.10', '3.11']
     steps:
       - uses: actions/checkout@v4
       - name: Get ODBC driver
@@ -49,7 +49,7 @@ jobs:
           poetry run python3 -m exasol_integration_test_docker_environment.main spawn-test-environment --environment-name test --database-port-forward 8888 --bucketfs-port-forward 6666
           sleep 120 # wait for SLC to be unpacked
       - name: Run all tests
-        run: ./scripts/test/run_all_tests.sh "localhost:8888" ../downloads/ODBC/lib/linux/x86_64/libexaodbc-uo2214lv2.so
+        run: poetry run scripts/test/run_locally.sh --server "localhost:8888" --odbc-driver="../downloads/ODBC/lib/linux/x86_64/libexaodbc-uo2214lv2.so"
         env:
           EXAPLUS: ../downloads/EXAPLUS
           TEST_DOCKER_NETWORK_NAME: db_network_test
@@ -66,8 +66,7 @@ jobs:
           python-version: '3.10'
           poetry-version: '1.8.2'
       - name: Build Release
-        run: |
-          bash ./scripts/build/build_release.sh
+        run: poetry build
       - name: Upload assets to the GitHub release draft
         uses: shogo82148/actions-upload-release-asset@v1
         with:

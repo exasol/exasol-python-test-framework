@@ -1,12 +1,14 @@
-# Exasol Python Test Framework 0.5.0, released TBD
+# Exasol Python Test Framework 0.5.0, released 2024-06-10
  
-Code name: 
+Code name: Python3.10
 
 ## Summary
 
+This release updates the minimal Python version to 3.10. Also it adds a mechanism to read the environment info from the test container.
+
 ## Features
 
- n/a
+  - #59: Implemented a mechanism to read the environment info from the test container
 
 ## Bugs
 
