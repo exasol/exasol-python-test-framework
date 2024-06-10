@@ -54,6 +54,7 @@ class ClientSetup(object):
             tmp.write('EXAHOST = %s\n' % server)
             tmp.write('EXAUID = %s\n' % user)
             tmp.write('EXAPWD = %s\n' % password)
+            tmp.write('ENCRYPT = no\n')
             tmp.write('CONNECTIONLCCTYPE = en_US.UTF-8\n')      # TODO Maybe make this optional
             tmp.write('CONNECTIONLCNUMERIC = en_US.UTF-8\n')
             if odbc_log != 'off':
