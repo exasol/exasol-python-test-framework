@@ -2,9 +2,23 @@ import argparse
 import os
 import socket
 
-
 from inspect import cleandoc
 from pathlib import Path
+
+
+ENV_VAR = "ODBCINI"
+
+LOG_LEVELS = {
+    "off": None,
+    "error": "ON ERROR ONLY",
+    "normal": "DEFAULT",
+    "verbose": "VERBOSE",
+}
+
+SSL_CERT_OPTIONS = {
+    "verify": None,
+    "unverified": "SSL_VERIFY_NONE",
+}
 
 
 def validate_driver_path(arg: str):
@@ -21,20 +35,6 @@ def validate_server(arg: str):
     if not arg:
         raise argparse.ArgumentTypeError("The connection string is empty!")
     return arg
-
-
-LOG_LEVELS = {
-    "off": None,
-    "error": "ON ERROR ONLY",
-    "normal": "DEFAULT",
-    "verbose": "VERBOSE",
-}
-
-ENV_VAR = "ODBCINI"
-
-
-class SslCertificateVerification:
-    NONE = "SSL_VERIFY_NONE"
 
 
 class ClientSetup(object):
@@ -59,12 +59,17 @@ class ClientSetup(object):
             type=validate_driver_path)
         parser.add_argument(
             "--odbc-log", choices=LOG_LEVELS,
-            help="activate ODBC driver log (default: off)")
+            help='activate ODBC driver log (default: %(default)s)',
+        )
+        parser.add_argument(
+            "--ssl-cert", choices=SSL_CERT_OPTIONS,
+            help='SSL certificate verification (default: %(default)s)',
+        )
         return parser
 
     def _write_odbcini(self, log_path, server, driver,
                        user, password, odbc_log,
-                       ssl_certificate_verification) -> str:
+                       ssl_cert) -> str:
         def cleandoc_nl(string):
             return cleandoc(string) + "\n"
 
@@ -85,9 +90,10 @@ class ClientSetup(object):
                     CONNECTIONLCCTYPE = en_US.UTF-8
                     CONNECTIONLCNUMERIC = en_US.UTF-8
                     """
-                    ))
-            if ssl_certificate_verification:
-                file.write(f"SSLCERTIFICATE = {ssl_certificate_verification}\n")
+            ))
+            print(f'{ssl_cert}')
+            if ssl_cert != "verify":
+                file.write(f"SSLCERTIFICATE = {SSL_CERT_OPTIONS[ssl_cert]}\n")
             if odbc_log != "off":
                 file.write(cleandoc_nl(
                         f"""
@@ -105,8 +111,7 @@ class ClientSetup(object):
             user,
             password,
             odbc_log,
-            ssl_certificate_verification = SslCertificateVerification.NONE,
-            fingerprint = None,
+            ssl_cert = "unverified",
     ):
         path = self._write_odbcini(
             log_path,
@@ -115,6 +120,6 @@ class ClientSetup(object):
             user,
             password,
             odbc_log,
-            ssl_certificate_verification,
+            ssl_cert,
         )
         os.environ[ENV_VAR] = path
