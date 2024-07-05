@@ -16,7 +16,7 @@ jobs:
         id: get-odbc-driver
         run: |
           FILE=$(bash .github/workflows/scripts/download_odbc_driver.sh "$(pwd)/..")
-          echo so-file=\'$FILE\' >> "$GITHUB_OUTPUT"
+          echo so-file="$FILE" >> "$GITHUB_OUTPUT"
       - name: Get EXAPLUS
         run: bash .github/workflows/scripts/download_exaplus.sh "$(pwd)/.."
       - name: Setup Python & Poetry Environment
