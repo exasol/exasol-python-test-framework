@@ -59,7 +59,7 @@ class ClientSetup(object):
         return parser
 
     def _write_odbcini(self, log_path, server, driver, user,
-                       password, odbc_log, fingerprint = None) -> Path:
+                       password, odbc_log, fingerprint = None) -> str:
         def cleandoc_nl(string):
             return cleandoc(string) + "\n"
 
@@ -91,7 +91,7 @@ class ClientSetup(object):
                         LOG_LEVELS = {LOG_LEVELS[odbc_log]}
                         """
                         ))
-        return path
+        return str(path)
 
     def prepare_odbc_init(self, log_path, server, driver, user, password, odbc_log, fingerprint = None):
         path = self._write_odbcini(log_path, server, driver, user, password, odbc_log, fingerprint)
