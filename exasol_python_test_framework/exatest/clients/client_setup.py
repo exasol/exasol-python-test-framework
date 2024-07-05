@@ -32,6 +32,11 @@ LOG_LEVELS = {
 
 ENV_VAR = "ODBCINI"
 
+# special values for fingerprint
+FINGERPRINTS = [
+    "NoCertCheck",
+]
+
 
 class ClientSetup(object):
 
