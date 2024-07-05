@@ -32,10 +32,9 @@ LOG_LEVELS = {
 
 ENV_VAR = "ODBCINI"
 
-# special values for fingerprint
-FINGERPRINTS = [
-    "NoCertCheck",
-]
+
+class SslCertificateVerification:
+    NONE = "SSL_VERIFY_NONE"
 
 
 class ClientSetup(object):
@@ -63,8 +62,9 @@ class ClientSetup(object):
             help="activate ODBC driver log (default: off)")
         return parser
 
-    def _write_odbcini(self, log_path, server, driver, user,
-                       password, odbc_log, fingerprint = None) -> str:
+    def _write_odbcini(self, log_path, server, driver,
+                       user, password, odbc_log,
+                       ssl_certificate_verification) -> str:
         def cleandoc_nl(string):
             return cleandoc(string) + "\n"
 
@@ -84,11 +84,10 @@ class ClientSetup(object):
                     EXAPWD = {password}
                     CONNECTIONLCCTYPE = en_US.UTF-8
                     CONNECTIONLCNUMERIC = en_US.UTF-8
-                    SSLCERTIFICATE = SSL_VERIFY_NONE
                     """
                     ))
-            if fingerprint:
-                file.write(f"FINGERPRINT = {fingerprint}\n")
+            if ssl_certificate_verification:
+                file.write(f"SSLCERTIFICATE = {ssl_certificate_verification}\n")
             if odbc_log != "off":
                 file.write(cleandoc_nl(
                         f"""
@@ -98,27 +97,24 @@ class ClientSetup(object):
                         ))
         return str(path)
 
-    def prepare_odbc_init(self, log_path, server, driver, user, password, odbc_log, fingerprint = None):
-        path = self._write_odbcini(log_path, server, driver, user, password, odbc_log, fingerprint)
+    def prepare_odbc_init(
+            self,
+            log_path,
+            server,
+            driver,
+            user,
+            password,
+            odbc_log,
+            ssl_certificate_verification = SslCertificateVerification.NONE,
+            fingerprint = None,
+    ):
+        path = self._write_odbcini(
+            log_path,
+            server,
+            driver,
+            user,
+            password,
+            odbc_log,
+            ssl_certificate_verification,
+        )
         os.environ[ENV_VAR] = path
-
-
-import sys
-if __name__ == "__main__":
-    setup = ClientSetup()
-    parser = argparse.ArgumentParser(
-        description="""
-        Synchronize sub-tasks from GitHub to Jira.
-        """
-    )
-    args = setup.odbc_arguments(parser).parse_args()
-    dir = Path("/home/chku/tmp")
-    setup.prepare_odbc_init(
-        dir,
-        "localhost",
-        "my-driver",
-        "my-user",
-        "my-password",
-        "verbose",
-        "fp",
-    )
