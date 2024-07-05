@@ -54,7 +54,6 @@ jobs:
               --bucketfs-port-forward 6666
           sleep 120 # wait for SLC to be unpacked
       - name: Run all tests
-        # run: poetry run scripts/test/run_locally.sh --server "localhost:8888" --odbc-driver="../downloads/ODBC/lib/linux/x86_64/libexaodbc-uo2214lv2.so"
         run: |
           poetry run scripts/test/run_locally.sh --server "localhost:8888" \
           --odbc-driver="${{ steps.get-odbc-driver.outputs.so-file }}"
