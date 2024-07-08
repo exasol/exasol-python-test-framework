@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "exasol-python-test-framework"
-version = "0.0.6"
+version = "0.6.0"
 description = "Python Test framework for Exasol database tests"
 
 license = "MIT"
