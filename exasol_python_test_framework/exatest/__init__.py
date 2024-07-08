@@ -247,6 +247,7 @@ class TestProgram(object):
                 logdir='.',
                 loglevel='warning',
                 odbc_log='off',
+                tls_cert='unverified',
                 connect=None,
                 driver=None,
                 debugger=False,
@@ -282,8 +283,15 @@ class TestProgram(object):
 
     def _main(self):
         self.opts.log.info('prepare for tests')
-        self._client_setup.prepare_odbc_init(self.opts.logdir, self.opts.server, self.opts.driver,
-                                             self.opts.user, self.opts.password, self.opts.odbc_log)
+        self._client_setup.prepare_odbc_init(
+            self.opts.logdir,
+            self.opts.server,
+            self.opts.driver,
+            self.opts.user,
+            self.opts.password,
+            self.opts.odbc_log,
+            self.opts.tls_cert,
+        )
         prepare_ok = self.prepare_hook()
         self.opts.log.info('starting tests')
         testprogram = unittest.main(

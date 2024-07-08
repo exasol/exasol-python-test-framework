@@ -34,11 +34,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Get ODBC driver
+        id: get-odbc-driver
         run: |
-          bash .github/workflows/scripts/download_odbc_driver.sh "$(pwd)/.."
+          FILE=$(bash .github/workflows/scripts/download_odbc_driver.sh "$(pwd)/..")
+          echo so-file="$FILE" >> "$GITHUB_OUTPUT"
       - name: Get EXAPLUS
-        run: |
-          bash .github/workflows/scripts/download_exaplus.sh "$(pwd)/.."
+        run: bash .github/workflows/scripts/download_exaplus.sh "$(pwd)/.."
       - name: Setup Python & Poetry Environment
         uses: exasol/python-toolbox/.github/actions/python-environment@0.12.0
         with:
@@ -46,10 +47,16 @@ jobs:
           poetry-version: '1.8.2'
       - name: Spawn EXASOL environemnt
         run: |
-          poetry run python3 -m exasol_integration_test_docker_environment.main spawn-test-environment --environment-name test --database-port-forward 8888 --bucketfs-port-forward 6666
+          poetry run python3 -m exasol_integration_test_docker_environment.main \
+              spawn-test-environment \
+              --environment-name test \
+              --database-port-forward 8888 \
+              --bucketfs-port-forward 6666
           sleep 120 # wait for SLC to be unpacked
       - name: Run all tests
-        run: poetry run scripts/test/run_locally.sh --server "localhost:8888" --odbc-driver="../downloads/ODBC/lib/linux/x86_64/libexaodbc-uo2214lv2.so"
+        run: |
+          poetry run scripts/test/run_locally.sh --server "localhost:8888" \
+          --odbc-driver="${{ steps.get-odbc-driver.outputs.so-file }}"
         env:
           EXAPLUS: ../downloads/EXAPLUS
           TEST_DOCKER_NETWORK_NAME: db_network_test
