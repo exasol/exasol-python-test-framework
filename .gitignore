@@ -6,3 +6,5 @@ dist
 *.log
 odbc.ini
 
+# Emacs
+TAGS
