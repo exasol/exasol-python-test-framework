@@ -91,7 +91,6 @@ class ClientSetup(object):
                     CONNECTIONLCNUMERIC = en_US.UTF-8
                     """
             ))
-            print(f'{ssl_cert}')
             if ssl_cert != "verify":
                 file.write(f"SSLCERTIFICATE = {SSL_CERT_OPTIONS[ssl_cert]}\n")
             if odbc_log != "off":
