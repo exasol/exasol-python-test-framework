@@ -6,6 +6,8 @@ Code name: Configure TLS certificate validation
 
 This release adds a CLI option controlling parameter `SSLCERTIFICATE` in file `odbc.ini`.
 
+Starting with version `0.6.0`, EPTF is also available on pypi.
+
 Additionally, the release fixes vulnerabilities by updating dependencies:
 * CVE-2024-35195 in dependency `requests` in versions < `2.32.0` caused by requests `Session` object not verifying requests after making first request with `verify=False`
 * CVE-2024-37891 in transitive dependency via `boto3` to `urllib3` in versions < `2.2.2` caused by proxy-authorization request header not to be stripped during cross-origin redirects as no update of notebook-connector is available, yet.
@@ -22,3 +24,7 @@ However, the release ignores the following vulnerabilities
 ## Features
 
 * #66: Added CLI option controlling parameter `SSLCERTIFICATE` in file `odbc.ini`.
+
+## Refactorings
+
+* #67: Enabled publication on pypi
