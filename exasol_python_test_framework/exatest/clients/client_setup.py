@@ -15,7 +15,7 @@ LOG_LEVELS = {
     "verbose": "VERBOSE",
 }
 
-SSL_CERT_OPTIONS = {
+TLS_CERT_OPTIONS = {
     "verify": None,
     "unverified": "SSL_VERIFY_NONE",
 }
@@ -62,14 +62,14 @@ class ClientSetup(object):
             help='activate ODBC driver log (default: %(default)s)',
         )
         parser.add_argument(
-            "--ssl-cert", choices=SSL_CERT_OPTIONS,
-            help='SSL certificate verification (default: %(default)s)',
+            "--tls-cert", choices=TLS_CERT_OPTIONS,
+            help='TLS certificate verification (default: %(default)s)',
         )
         return parser
 
     def _write_odbcini(self, log_path, server, driver,
                        user, password, odbc_log,
-                       ssl_cert) -> str:
+                       tls_cert) -> str:
         def cleandoc_nl(string):
             return cleandoc(string) + "\n"
 
@@ -91,8 +91,8 @@ class ClientSetup(object):
                     CONNECTIONLCNUMERIC = en_US.UTF-8
                     """
             ))
-            if ssl_cert != "verify":
-                file.write(f"SSLCERTIFICATE = {SSL_CERT_OPTIONS[ssl_cert]}\n")
+            if tls_cert != "verify":
+                file.write(f"SSLCERTIFICATE = {TLS_CERT_OPTIONS[tls_cert]}\n")
             if odbc_log != "off":
                 file.write(cleandoc_nl(
                         f"""
@@ -110,7 +110,7 @@ class ClientSetup(object):
             user,
             password,
             odbc_log,
-            ssl_cert = "unverified",
+            tls_cert = "unverified",
     ):
         path = self._write_odbcini(
             log_path,
@@ -119,6 +119,6 @@ class ClientSetup(object):
             user,
             password,
             odbc_log,
-            ssl_cert,
+            tls_cert,
         )
         os.environ[ENV_VAR] = path

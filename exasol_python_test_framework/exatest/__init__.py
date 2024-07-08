@@ -247,7 +247,7 @@ class TestProgram(object):
                 logdir='.',
                 loglevel='warning',
                 odbc_log='off',
-                ssl_cert='unverified',
+                tls_cert='unverified',
                 connect=None,
                 driver=None,
                 debugger=False,
@@ -290,7 +290,7 @@ class TestProgram(object):
             self.opts.user,
             self.opts.password,
             self.opts.odbc_log,
-            self.opts.ssl_cert,
+            self.opts.tls_cert,
         )
         prepare_ok = self.prepare_hook()
         self.opts.log.info('starting tests')
