@@ -244,7 +244,7 @@ class TestCase(exatest.TestCase):
 
     def query_via_exaplus(self, query):
         cmd = '''%(exaplus)s -c %(conn)s -u %(user)s -P %(password)s
-                        -no-config -autocommit ON -L -pipe''' % {
+                        -no-config -autocommit ON -L -pipe jdbcparam validateservercertificate=0''' % {
             'exaplus': os.environ.get('EXAPLUS'),
             'conn': opts.server,
             'user': self.user,
