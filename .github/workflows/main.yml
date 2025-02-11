@@ -17,6 +17,15 @@ jobs:
         run: |
           FILE=$(bash .github/workflows/scripts/download_odbc_driver.sh "$(pwd)/..")
           echo so-file="$FILE" >> "$GITHUB_OUTPUT"
+      - name: Check ODBC File
+        run: |
+          if [ ! -f "${{ steps.get-odbc-driver.outputs.so-file }}" ]
+          then
+              echo "ODBC file not found"
+              exit 1
+          else
+              echo "ODBC File found."
+          fi
       - name: Get EXAPLUS
         run: bash .github/workflows/scripts/download_exaplus.sh "$(pwd)/.."
       - name: Setup Python & Poetry Environment
