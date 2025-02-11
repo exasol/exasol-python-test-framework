@@ -5,3 +5,7 @@ Code name: t.b.d.
 ## Summary
 
 t.b.d.
+
+## Security
+
+ - #76: Updated dependencies
