@@ -9,3 +9,4 @@ t.b.d.
 ## Security
 
  - #76: Updated dependencies
+ - #77: Updated dependencies on top of 0.6.1
