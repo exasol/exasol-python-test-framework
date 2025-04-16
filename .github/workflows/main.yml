@@ -35,7 +35,7 @@ jobs:
           poetry-version: '1.8.2'
       - name: Spawn EXASOL environemnt
         run: |
-          poetry run python3 -m exasol_integration_test_docker_environment.main \
+          poetry run -- python3 -m exasol_integration_test_docker_environment.main \
               spawn-test-environment \
               --environment-name test \
               --database-port-forward 8888 \
@@ -43,7 +43,7 @@ jobs:
           sleep 120 # wait for SLC to be unpacked
       - name: Run all tests
         run: |
-          poetry run scripts/test/run_locally.sh \
+          poetry run -- scripts/test/run_locally.sh \
              --server "localhost:8888" \
              --odbc-driver="${{ steps.get-odbc-driver.outputs.so-file }}"
         env:
