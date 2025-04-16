@@ -29,10 +29,10 @@ jobs:
       - name: Get EXAPLUS
         run: bash .github/workflows/scripts/download_exaplus.sh "$(pwd)/.."
       - name: Setup Python & Poetry Environment
-        uses: exasol/python-toolbox/.github/actions/python-environment@0.12.0
+        uses: exasol/python-toolbox/.github/actions/python-environment@1.0.1
         with:
           python-version: ${{ matrix.python-version }}
-          poetry-version: '2.1.2'
+          poetry-version: "2.1.2"
       - name: Spawn EXASOL environment
         run: |
           poetry run -- python3 -m exasol_integration_test_docker_environment.main \
