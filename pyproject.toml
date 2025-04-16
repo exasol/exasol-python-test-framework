@@ -14,6 +14,7 @@ repository = "https://github.com/exasol/exasol-python-test-framework"
 homepage = "https://github.com/exasol/exasol-python-test-framework"
 
 [tool.poetry]
+requires-poetry = ">=2.1.0"
 include = ["exatest","udf"]
 exclude = ["lang"]
 
