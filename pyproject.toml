@@ -1,24 +1,22 @@
-[tool.poetry]
+[project]
 name = "exasol-python-test-framework"
 version = "0.7.0"
 description = "Python Test framework for Exasol database tests"
-
-license = "MIT"
-
 authors = [
-    "Exasol AG <opensource@exasol.com>"
+    {name="Exasol AG", email="opensource@exasol.com"}
 ]
+readme = 'README.md'
+license = "MIT"
+keywords = ['exasol', 'testing']
 
-readme = 'README.md'  # Markdown files are supported
-
+[project.urls]
 repository = "https://github.com/exasol/exasol-python-test-framework"
 homepage = "https://github.com/exasol/exasol-python-test-framework"
 
+[tool.poetry]
+requires-poetry = ">=2.1.0"
 include = ["exatest","udf"]
-keywords = ['exasol', 'testing']
-
 exclude = ["lang"]
-
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.12"
