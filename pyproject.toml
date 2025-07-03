@@ -1,6 +1,7 @@
 [project]
 name = "exasol-python-test-framework"
 version = "0.7.0"
+requires-python = ">=3.10,<3.12"
 description = "Python Test framework for Exasol database tests"
 authors = [
     {name="Exasol AG", email="opensource@exasol.com"}
@@ -8,6 +9,7 @@ authors = [
 readme = 'README.md'
 license = "MIT"
 keywords = ['exasol', 'testing']
+dynamic = ["dependencies"]
 
 [project.urls]
 repository = "https://github.com/exasol/exasol-python-test-framework"
@@ -19,7 +21,6 @@ include = ["exatest","udf"]
 exclude = ["lang"]
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.12"
 pyodbc = "^5.1.0"
 numpy = ">=1.26"
 scipy = "^1.13.0"
