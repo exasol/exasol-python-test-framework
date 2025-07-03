@@ -12,6 +12,7 @@ t.b.d.
  - #77: Updated dependencies on top of 0.6.1
  - #80: Updated dependencies
  - #83: Updated poetry dependencies
+ - #88: Updated poetry dependencies
 
 ## Refactoring
 

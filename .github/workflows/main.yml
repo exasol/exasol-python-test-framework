@@ -6,6 +6,8 @@ on:
 jobs:
   integration_tests:
     runs-on: ubuntu-22.04
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -29,7 +31,7 @@ jobs:
       - name: Get EXAPLUS
         run: bash .github/workflows/scripts/download_exaplus.sh "$(pwd)/.."
       - name: Setup Python & Poetry Environment
-        uses: exasol/python-toolbox/.github/actions/python-environment@1.0.1
+        uses: exasol/python-toolbox/.github/actions/python-environment@1.6.0
         with:
           python-version: ${{ matrix.python-version }}
           poetry-version: "2.1.2"
