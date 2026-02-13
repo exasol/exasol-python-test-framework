@@ -13,6 +13,7 @@ t.b.d.
  - #80: Updated dependencies
  - #83: Updated poetry dependencies
  - #88: Updated poetry dependencies
+ - #95: Updated poetry dependencies
 
 ## Refactoring
 
