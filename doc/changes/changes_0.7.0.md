@@ -18,3 +18,7 @@ t.b.d.
 ## Refactoring
 
 - #80: Updated to poetry 2.1.2
+
+## Internal
+
+ - Relocked to fix security vulnerabilities
