@@ -14,6 +14,7 @@ t.b.d.
  - #83: Updated poetry dependencies
  - #88: Updated poetry dependencies
  - #95: Updated poetry dependencies, exasol-integration-test-docker-environment (3.4.0 -> 5.0.0)
+ - #98: Resolve vulnerabilities on 0.6.1
 
 ## Refactoring
 
