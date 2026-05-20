@@ -296,7 +296,7 @@ class TestCase(exatest.TestCase):
         rows = []
         for i, row in enumerate(table_generator):
             values = ','.join(self._convert_insert_value(value) for value in row)
-            row_str = "(%s)" % (values)
+            row_str = "(%s)" % values
             rows.append(row_str)
             if i % tuples_per_insert == 0 and i > 0:
                 self.run_insert(table_name, column_names_str, rows)
