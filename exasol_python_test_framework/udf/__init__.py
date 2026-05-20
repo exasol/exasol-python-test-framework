@@ -54,13 +54,13 @@ def requires(req):
 def get_supported_languages():
     result_lang = []
     # First we prepare a regular expression to get the first language
-    # (re.match() returns only the occurence matching from start of string)
+    # (re.match() returns only the occurrence matching from start of string)
     languages_from_args = getScriptLanguagesFromArgs()
     r = re.compile(r"(\w+)=")
     first_lang = r.match(languages_from_args)
     if first_lang:
         result_lang.append(first_lang.group(1))
-    # And now we get the rest. All other languages must start with a whitespace and endwith the equal sign,
+    # And now we get the rest. All other languages must start with a whitespace and end with the equal sign,
     # we can take leverage of that in the regex.
     r = re.compile(r"\s(\w+)=")
     # re.findall is very handy here: It returns the list of the groups for each match.
