@@ -68,7 +68,7 @@ class DockerDBEnvironment:
             container.remove(v=True, force=True)
         except:
             pass
-        self._started_containers.remove(containers)
+        self._started_containers.remove(container)
 
     def list_started_containers(self):
         return list(self._started_containers)

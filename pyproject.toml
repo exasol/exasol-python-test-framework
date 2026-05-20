@@ -33,5 +33,3 @@ pyftpdlib = ">=1.5.6"
 exasol-integration-test-docker-environment = "^5.0.0"
 toml = ">=0.10.2"
 gitpython = ">=3.1.0"
-
-

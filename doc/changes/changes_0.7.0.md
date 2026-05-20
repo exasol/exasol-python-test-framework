@@ -19,6 +19,7 @@ t.b.d.
 ## Refactoring
 
 - #80: Updated to poetry 2.1.2
+- #87: Fixed variable name
 
 ## Internal
 
