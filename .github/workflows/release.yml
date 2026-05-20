@@ -2,7 +2,8 @@ name: Build & Publish
 
 on:
   push:
-    tags: '**'
+    tags:
+      - '**'
 
   workflow_dispatch:
 
