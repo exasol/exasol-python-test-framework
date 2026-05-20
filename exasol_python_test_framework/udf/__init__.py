@@ -300,7 +300,7 @@ class TestCase(exatest.TestCase):
             rows.append(row_str)
             if i % tuples_per_insert == 0 and i > 0:
                 self.run_insert(table_name, column_names_str, rows)
-                del rows_str
+                del row_str
                 rows = []
         self.run_insert(table_name, column_names_str, rows)
 
