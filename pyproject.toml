@@ -1,36 +1,39 @@
 [project]
 name = "exasol-python-test-framework"
 version = "0.7.0"
-requires-python = ">=3.10,<3.12"
 description = "Python Test framework for Exasol database tests"
-authors = [
-    {name="Exasol AG", email="opensource@exasol.com"}
-]
-readme = 'README.md'
+authors = [{ name = "Exasol AG", email = "opensource@exasol.com" }]
+requires-python = ">=3.10,<3.12"
+readme = "README.md"
 license = "MIT"
-keywords = ['exasol', 'testing']
+keywords = [
+    "exasol",
+    "testing",
+]
+dependencies = [
+    "pyodbc>=5.1.0,<6",
+    "numpy>=1.26",
+    "scipy>=1.13.0,<2",
+    # The `sys_platform` marker makes sure the docker dependency is only installed on
+    # non windows platforms.
+    "docker>=5.0.3 ; sys_platform != 'win32'",
+    "pyftpdlib>=1.5.6",
+]
 dynamic = ["dependencies"]
 
 [project.urls]
 repository = "https://github.com/exasol/exasol-python-test-framework"
 homepage = "https://github.com/exasol/exasol-python-test-framework"
 
+[dependency-groups]
+dev = [
+    "exasol-integration-test-docker-environment>=5.0.0,<6",
+    "toml>=0.10.2",
+    "gitpython>=3.1.0",
+    "exasol-toolbox>=8.1.1,<9",
+]
+
 [tool.poetry]
-requires-poetry = ">=2.1.0"
+requires-poetry = ">=2.3.0"
 include = ["exatest","udf"]
 exclude = ["lang"]
-
-[tool.poetry.dependencies]
-pyodbc = "^5.1.0"
-numpy = ">=1.26"
-scipy = "^1.13.0"
-# The `sys_platform` marker makes sure the docker dependency is only installed on
-# non windows platforms.
-docker = { version = ">=5.0.3", markers = "sys_platform != 'win32'"}
-pyftpdlib = ">=1.5.6"
-
-[tool.poetry.group.dev.dependencies]
-exasol-integration-test-docker-environment = "^5.0.0"
-toml = ">=0.10.2"
-gitpython = ">=3.1.0"
-exasol-toolbox = "^8.1.1"
