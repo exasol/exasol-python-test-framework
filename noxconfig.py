@@ -22,4 +22,5 @@ class Config(BaseConfig):
 PROJECT_CONFIG = Config(
     project_name="exasol_python_test_framework",
     root_path=Path(__file__).parent,
+    python_versions=("3.10", "3.11"),
 )
