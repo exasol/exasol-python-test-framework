@@ -1,10 +1,63 @@
-*.pyc
-.vscode/settings.json
-.env
+.lint.json
+.security.json
+
+odbcconfig/odbcinst.ini
+
+.html-documentation
+
+.coverage
+.sonar
+
+_build/
+
+*.py[cod]
+.build_output
+
+# Idea / Pycharm
 .idea
+.cache
+
+# C extensions
+*.so
+
+# Packages
+.eggs/
+*.egg
+*.egg-info
 dist
-*.log
-odbc.ini
+build
+eggs
+parts
+bin
+include
+var
+sdist
+develop-eggs
+.installed.cfg
+lib
+lib64
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+.coverage
+.tox
+.nox
+nosetests.xml
+
+# Translations
+*.mo
+
+# Mr Developer
+.mr.developer.cfg
+.project
+.pydevproject
+.vscode/settings.json
 
 # Emacs
 TAGS
+
+# AI
+.codex
+.serena
