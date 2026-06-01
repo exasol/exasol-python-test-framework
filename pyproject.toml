@@ -6,6 +6,7 @@ authors = [{ name = "Exasol AG", email = "opensource@exasol.com" }]
 requires-python = ">=3.10,<3.12"
 readme = "README.md"
 license = "MIT"
+license-files = ["LICENSE"]
 keywords = [
     "exasol",
     "testing",
@@ -19,7 +20,11 @@ dependencies = [
     "docker>=5.0.3 ; sys_platform != 'win32'",
     "pyftpdlib>=1.5.6",
 ]
-dynamic = ["dependencies"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
 
 [project.urls]
 repository = "https://github.com/exasol/exasol-python-test-framework"
@@ -37,3 +42,54 @@ dev = [
 requires-poetry = ">=2.3.0"
 include = ["exatest","udf"]
 exclude = ["lang"]
+
+[build-system]
+requires = ["poetry-core>=2.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.coverage.run]
+relative_files = true
+source = [
+    "exasol_python_test_framework",
+]
+
+[tool.coverage.report]
+fail_under = 15
+
+[tool.black]
+line-length = 88
+verbose = false
+include = "\\.pyi?$"
+
+[tool.isort]
+profile = "black"
+force_grid_wrap = 2
+
+[tool.pylint.master]
+fail-under = 7.5
+
+[tool.pylint.format]
+max-line-length = 88
+max-module-lines = 800
+
+[tool.mypy]
+plugins = ['pydantic.mypy']
+
+[[tool.mypy.overrides]]
+module = [
+    "test.unit.*",
+]
+ignore_errors = true
+
+[tool.ruff.lint]
+extend-ignore = [
+    "E", # Syntax errors
+    "F", # Pyflakes rules (excluding F401)
+    "UP", # pyupgrade rules
+    "D", # Docstring rules
+]
+extend-select = ["F401"]
+unfixable = []
+
+[tool.poetry.requires-plugins]
+poetry-plugin-export = ">=1.8"
