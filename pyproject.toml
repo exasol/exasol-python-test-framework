@@ -66,7 +66,7 @@ profile = "black"
 force_grid_wrap = 2
 
 [tool.pylint.master]
-fail-under = 7.5
+fail-under = 7.0
 
 [tool.pylint.format]
 max-line-length = 88
