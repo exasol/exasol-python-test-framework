@@ -1,10 +1,6 @@
-# Exasol Python Test Framework 0.7.0, released t.b.d.
-
-Code name: t.b.d.
+# Unreleased
 
 ## Summary
-
-t.b.d.
 
 ## Security
 
@@ -14,7 +10,8 @@ t.b.d.
  - #83: Updated poetry dependencies
  - #88: Updated poetry dependencies
  - #95: Updated poetry dependencies, exasol-integration-test-docker-environment (3.4.0 -> 5.0.0)
- - #98: Resolve vulnerabilities on 0.6.1
+ - #98: Resolved vulnerabilities on 0.6.1
+ - #101: Added exasol-toolbox as a development dependency
 
 ## Refactoring
 
