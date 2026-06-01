@@ -1,0 +1,26 @@
+# Generated and maintained by the exasol-toolbox.
+# Last generated with exasol-toolbox version 8.1.1.
+name: CD
+
+on:
+  push:
+    tags:
+      - '**'
+      - '!v*'
+
+jobs:
+  check-release-tag:
+    name: Check Release Tag
+    uses: ./.github/workflows/check-release-tag.yml
+    permissions:
+      contents: read
+
+  build-and-publish:
+    needs:
+      - check-release-tag
+    name: Build & Publish
+    uses: ./.github/workflows/build-and-publish.yml
+    permissions:
+      contents: write
+    secrets:
+      PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}

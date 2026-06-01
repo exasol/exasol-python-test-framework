@@ -1,0 +1,11 @@
+workflows:
+  - name: cd
+    # This will be resolved in:
+    #   https://github.com/exasol/exasol-python-test-framework/issues/102
+    remove_jobs:
+      - publish-docs
+  - name: checks
+    remove_jobs:
+      # This will be resolved in:
+      #   https://github.com/exasol/exasol-python-test-framework/issues/102
+      - build-documentation-and-check-links
