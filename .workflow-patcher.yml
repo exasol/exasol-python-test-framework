@@ -18,3 +18,8 @@ workflows:
       # This job will be re-activated in:
       #   https://github.com/exasol/exasol-python-test-framework/issues/105
       - check-workflows
+  - name: periodic-validation
+    remove_jobs:
+      # This job will be re-activated in:
+      #  https://github.com/exasol/exasol-python-test-framework/issues/107
+      - run-slow-checks
