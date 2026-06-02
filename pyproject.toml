@@ -1,35 +1,100 @@
 [project]
 name = "exasol-python-test-framework"
 version = "0.7.0"
-requires-python = ">=3.10,<3.12"
 description = "Python Test framework for Exasol database tests"
-authors = [
-    {name="Exasol AG", email="opensource@exasol.com"}
-]
-readme = 'README.md'
+authors = [{ name = "Exasol AG", email = "opensource@exasol.com" }]
+requires-python = ">=3.10,<3.12"
+readme = "README.md"
 license = "MIT"
-keywords = ['exasol', 'testing']
-dynamic = ["dependencies"]
+license-files = ["LICENSE"]
+keywords = [
+    "exasol",
+    "testing",
+]
+dependencies = [
+    "pyodbc>=5.1.0,<6",
+    "numpy>=1.26",
+    "scipy>=1.13.0,<2",
+    # The `sys_platform` marker makes sure the docker dependency is only installed on
+    # non windows platforms.
+    "docker>=5.0.3 ; sys_platform != 'win32'",
+    "pyftpdlib>=1.5.6",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
 
 [project.urls]
 repository = "https://github.com/exasol/exasol-python-test-framework"
 homepage = "https://github.com/exasol/exasol-python-test-framework"
 
+[dependency-groups]
+dev = [
+    "exasol-integration-test-docker-environment>=5.0.0,<6",
+    "toml>=0.10.2",
+    "gitpython>=3.1.0",
+    "exasol-toolbox>=8.1.1,<9",
+]
+
 [tool.poetry]
-requires-poetry = ">=2.1.0"
+requires-poetry = ">=2.3.0"
 include = ["exatest","udf"]
 exclude = ["lang"]
 
-[tool.poetry.dependencies]
-pyodbc = "^5.1.0"
-numpy = ">=1.26"
-scipy = "^1.13.0"
-# The `sys_platform` marker makes sure the docker dependency is only installed on
-# non windows platforms.
-docker = { version = ">=5.0.3", markers = "sys_platform != 'win32'"}
-pyftpdlib = ">=1.5.6"
+[build-system]
+requires = ["poetry-core>=2.0.0"]
+build-backend = "poetry.core.masonry.api"
 
-[tool.poetry.group.dev.dependencies]
-exasol-integration-test-docker-environment = "^5.0.0"
-toml = ">=0.10.2"
-gitpython = ">=3.1.0"
+[tool.coverage.run]
+relative_files = true
+source = [
+    "exasol_python_test_framework",
+]
+
+[tool.coverage.report]
+fail_under = 15
+
+[tool.black]
+line-length = 88
+verbose = false
+include = "\\.pyi?$"
+
+[tool.isort]
+profile = "black"
+force_grid_wrap = 2
+
+[tool.pylint.master]
+fail-under = 7.0
+
+[tool.pylint.format]
+max-line-length = 88
+max-module-lines = 800
+
+[tool.mypy]
+plugins = ['pydantic.mypy']
+
+[[tool.mypy.overrides]]
+module = [
+    "test.unit.*",
+]
+ignore_errors = true
+
+[tool.ruff.lint]
+extend-ignore = [
+    "E", # Syntax errors
+    "F", # Pyflakes rules (excluding F401)
+    "UP", # pyupgrade rules
+    "D", # Docstring rules
+]
+extend-select = ["F401"]
+unfixable = []
+
+[tool.poetry.requires-plugins]
+poetry-plugin-export = ">=1.8"
+
+[tool.sonar]
+projectKey = "com.exasol:exasol-python-test-framework"
+host.url = "https://sonarcloud.io"
+organization = "exasol"

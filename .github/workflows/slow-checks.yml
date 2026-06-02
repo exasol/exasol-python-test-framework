@@ -1,10 +1,10 @@
-name: CI
+name: Slow-Checks
 
 on:
-  push:
+  workflow_call:
 
 jobs:
-  integration_tests:
+  run-integration-tests:
     runs-on: ubuntu-22.04
     permissions:
       contents: read
@@ -31,10 +31,10 @@ jobs:
       - name: Get EXAPLUS
         run: bash .github/workflows/scripts/download_exaplus.sh "$(pwd)/.."
       - name: Setup Python & Poetry Environment
-        uses: exasol/python-toolbox/.github/actions/python-environment@v5
+        uses: exasol/python-toolbox/.github/actions/python-environment@v8
         with:
           python-version: ${{ matrix.python-version }}
-          poetry-version: "2.1.2"
+          poetry-version: "2.3.0"
       - name: Spawn EXASOL environment
         run: |
           poetry run -- python3 -m exasol_integration_test_docker_environment.main \
