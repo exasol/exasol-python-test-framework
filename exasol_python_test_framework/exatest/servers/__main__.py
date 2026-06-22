@@ -17,7 +17,7 @@ from . import __ver__
 from ._compat import getcwdu
 from .authorizers import DummyAuthorizer
 from .log import config_logging
-from .servers import FTPServer
+from .ftp import FTPServer
 
 
 class CustomizedOptionFormatter(optparse.IndentedHelpFormatter):
