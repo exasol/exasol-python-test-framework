@@ -17,6 +17,7 @@
 
 - #80: Updated to poetry 2.1.2
 - #87: Fixed variable name
+- Python 3.12 compatibility for SMTP, UDF log, and FTP validation
 
 ## Internal
 

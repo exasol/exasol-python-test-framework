@@ -16,7 +16,6 @@ import sys
 from . import __ver__
 from ._compat import getcwdu
 from .authorizers import DummyAuthorizer
-from .handlers import FTPHandler
 from .log import config_logging
 from .servers import FTPServer
 
@@ -103,11 +102,7 @@ def main():
                             perm=perm)
     else:
         authorizer.add_anonymous(options.directory, perm=perm)
-    handler = FTPHandler
-    handler.authorizer = authorizer
-    handler.masquerade_address = options.nat_address
-    handler.passive_ports = passive_ports
-    ftpd = FTPServer((options.interface, options.port), FTPHandler)
+    ftpd = FTPServer(options.directory, authorizer=authorizer)
     try:
         ftpd.serve_forever()
     finally:
