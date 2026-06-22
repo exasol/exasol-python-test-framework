@@ -2,8 +2,10 @@
 
 import ftplib
 import os
+import socket
 import time
 import unittest
+from unittest.mock import MagicMock, patch
 
 from exasol_python_test_framework.exatest import useData
 from exasol_python_test_framework.exatest.test import selftest, run_selftest
@@ -13,9 +15,43 @@ from exasol_python_test_framework import exatest
 from exasol_python_test_framework.exatest.utils import tempdir
 from exasol_python_test_framework.exatest.servers import FTPServer
 from exasol_python_test_framework.exatest.servers.authorizers import DummyAuthorizer
+from exasol_python_test_framework.exatest.servers import __main__ as ftp_main
 
 
 class FTPServerTest(unittest.TestCase):
+    def test_cli_forwards_connection_options(self):
+        fake_server = MagicMock()
+        fake_server.serve_forever.return_value = None
+        fake_server.close_all.return_value = None
+
+        argv = [
+            "python",
+            "-d",
+            "/srv",
+            "-i",
+            "127.0.0.1",
+            "-p",
+            "2122",
+            "-n",
+            "198.51.100.10",
+            "-r",
+            "8000-8002",
+        ]
+        with patch.object(ftp_main, "FTPServer", return_value=fake_server) as ftp_server:
+            with patch("sys.argv", argv):
+                ftp_main.main()
+
+        ftp_server.assert_called_once()
+        args, kwargs = ftp_server.call_args
+        self.assertEqual(("/srv",), args)
+        self.assertEqual("127.0.0.1", kwargs["interface"])
+        self.assertEqual(2122, kwargs["port"])
+        self.assertEqual("198.51.100.10", kwargs["nat_address"])
+        self.assertEqual([8000, 8001, 8002], kwargs["passive_ports"])
+        self.assertIsInstance(kwargs["authorizer"], DummyAuthorizer)
+        fake_server.serve_forever.assert_called_once()
+        fake_server.close_all.assert_called_once()
+
     def test_anonymous(self):
         class Module:
             class Test(exatest.TestCase):
@@ -31,6 +67,23 @@ class FTPServerTest(unittest.TestCase):
                             ls = ftp.retrlines('LIST', data.append)
                             ftp.quit()
                     self.assertIn('dummy', '\n'.join(data))
+
+        with selftest(Module) as result:
+            self.assertTrue(result.wasSuccessful())
+
+    def test_pass_before_user_returns_530(self):
+        class Module:
+            class Test(exatest.TestCase):
+                def test_1(self):
+                    with tempdir() as tmp:
+                        with FTPServer(tmp) as ftpd:
+                            with socket.create_connection(ftpd.address, timeout=5) as conn:
+                                reader = conn.makefile("rb")
+                                self.assertIn(b"220", reader.readline())
+                                conn.sendall(b"PASS secret\r\n")
+                                self.assertIn(b"530", reader.readline())
+                                conn.sendall(b"QUIT\r\n")
+                                self.assertIn(b"221", reader.readline())
 
         with selftest(Module) as result:
             self.assertTrue(result.wasSuccessful())

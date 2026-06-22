@@ -62,6 +62,8 @@ class _SMTPMessageHandler(socketserver.StreamRequestHandler):
                     data_lines = []
                     self._write("250 OK")
                 else:
+                    if line.startswith(".."):
+                        line = line[1:]
                     data_lines.append(line)
                 continue
 

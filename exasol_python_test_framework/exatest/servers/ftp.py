@@ -1,4 +1,5 @@
 import os
+import random
 import socket
 import socketserver
 
@@ -7,10 +8,22 @@ from . import BaseSimpleServer
 
 
 class FTPServer(BaseSimpleServer):
-    def __init__(self, documentroot='.', authorizer=None):
+    def __init__(
+        self,
+        documentroot='.',
+        authorizer=None,
+        interface=None,
+        port=0,
+        nat_address=None,
+        passive_ports=None,
+    ):
         from . import authorizers
         super(FTPServer, self).__init__()
         self.documentroot = documentroot
+        self.interface = interface
+        self.port_number = port
+        self.nat_address = nat_address
+        self.passive_ports = list(passive_ports) if passive_ports is not None else None
         if authorizer is None:
             self.authorizer = authorizers.DummyAuthorizer()
             self.authorizer.add_anonymous(self.documentroot)
@@ -18,18 +31,32 @@ class FTPServer(BaseSimpleServer):
             self.authorizer = authorizer
         self._server = None
 
+    @staticmethod
+    def _resolve_host(interface):
+        if interface in (None, "", "0.0.0.0"):
+            return socket.gethostbyname(socket.getfqdn())
+        return socket.gethostbyname(interface)
+
     def _ftpserver(self):
         self._server.serve_forever(poll_interval=1)
 
     def _create_server(self):
         if self._server is None:
+            bind_host = self.interface if self.interface is not None else ""
+            public_host = (
+                socket.gethostbyname(self.nat_address)
+                if self.nat_address
+                else self._resolve_host(self.interface)
+            )
             self._server = _FTPControlServer(
-                ('', 0),
+                (bind_host, self.port_number),
                 documentroot=self.documentroot,
                 authorizer=self.authorizer,
-                host_ip=socket.gethostbyname(socket.getfqdn()),
+                host_ip=bind_host,
+                public_host=public_host,
+                passive_ports=self.passive_ports,
             )
-            self.host = socket.gethostbyname(socket.getfqdn())
+            self.host = public_host
             self.port = self._server.server_address[1]
 
     def start(self):
@@ -55,9 +82,30 @@ class FTPServer(BaseSimpleServer):
 
 
 class _FTPDataListener:
-    def __init__(self, host_ip):
-        self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self._socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    def __init__(self, host_ip, passive_ports=None):
+        self._socket = None
+        self._bind(host_ip, passive_ports)
+
+    def _create_socket(self):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        return sock
+
+    def _bind(self, host_ip, passive_ports):
+        if passive_ports is not None:
+            ports = list(passive_ports)
+            random.shuffle(ports)
+            for port in ports:
+                sock = self._create_socket()
+                try:
+                    sock.bind((host_ip, port))
+                except OSError:
+                    sock.close()
+                    continue
+                sock.listen(1)
+                self._socket = sock
+                return
+        self._socket = self._create_socket()
         self._socket.bind((host_ip, 0))
         self._socket.listen(1)
 
@@ -116,8 +164,12 @@ class _FTPControlHandler(socketserver.StreamRequestHandler):
 
     def _open_passive_data_socket(self):
         self._close_data_listener()
-        self._data_listener = _FTPDataListener(self.server.host_ip)
+        self._data_listener = _FTPDataListener(
+            self.server.host_ip,
+            passive_ports=self.server.passive_ports,
+        )
         host, port = self._data_listener.address
+        host = self.server.public_host or host
         octets = host.split(".")
         p1, p2 = divmod(port, 256)
         return ",".join(octets + [str(p1), str(p2)])
@@ -165,6 +217,9 @@ class _FTPControlHandler(socketserver.StreamRequestHandler):
                 self.username = argument or "anonymous"
                 self._send(331, "User name okay, need password.")
             elif command == "PASS":
+                if self.username is None:
+                    self._send(530, "Please login with USER first.")
+                    continue
                 try:
                     self.server.authorizer.validate_authentication(
                         self.username or "anonymous", argument, self
@@ -253,8 +308,10 @@ class _FTPControlServer(socketserver.ThreadingTCPServer):
     allow_reuse_address = True
     daemon_threads = True
 
-    def __init__(self, server_address, documentroot, authorizer, host_ip):
+    def __init__(self, server_address, documentroot, authorizer, host_ip, public_host, passive_ports):
         self.documentroot = documentroot
         self.authorizer = authorizer
         self.host_ip = host_ip
+        self.public_host = public_host
+        self.passive_ports = passive_ports
         super().__init__(server_address, _FTPControlHandler)

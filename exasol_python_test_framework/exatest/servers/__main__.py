@@ -102,7 +102,14 @@ def main():
                             perm=perm)
     else:
         authorizer.add_anonymous(options.directory, perm=perm)
-    ftpd = FTPServer(options.directory, authorizer=authorizer)
+    ftpd = FTPServer(
+        options.directory,
+        authorizer=authorizer,
+        interface=options.interface,
+        port=options.port,
+        nat_address=options.nat_address,
+        passive_ports=passive_ports,
+    )
     try:
         ftpd.serve_forever()
     finally:

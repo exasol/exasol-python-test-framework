@@ -35,6 +35,37 @@ class SMTPServerTest(unittest.TestCase):
         with selftest(Module) as result:
             self.assertTrue(result.wasSuccessful())
 
+    def test_dot_stuffed_body_is_unstuffed(self):
+        class Module:
+            class Test(exatest.TestCase):
+                def test_1(self):
+                    with SMTPServer(debug=False) as smtpd:
+                        host, port = smtpd.address
+                        client = smtplib.SMTP(host, port, timeout=5)
+                        msg = (
+                            "Subject: Dot test\r\n"
+                            "From: from@example.com\r\n"
+                            "To: to@example.com\r\n"
+                            "\r\n"
+                            "first line\r\n"
+                            ".leading dot\r\n"
+                            "last line\r\n"
+                        )
+                        client.sendmail(
+                            "from@example.com",
+                            ["to@example.com"],
+                            msg,
+                        )
+                        client.quit()
+                    self.assertEqual(1, len(smtpd.messages))
+                    body = smtpd.messages[0].body.decode("utf-8")
+                    self.assertIn("first line", body)
+                    self.assertIn(".leading dot", body)
+                    self.assertNotIn("..leading dot", body)
+
+        with selftest(Module) as result:
+            self.assertTrue(result.wasSuccessful())
+
     def test_esmtp(self):
         """
         Python3 supports ESMTP natively (while Python2 did not)
