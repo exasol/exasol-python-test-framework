@@ -18,7 +18,6 @@ dependencies = [
     # The `sys_platform` marker makes sure the docker dependency is only installed on
     # non windows platforms.
     "docker>=5.0.3 ; sys_platform != 'win32'",
-    "pyftpdlib>=1.5.6",
 ]
 classifiers = [
     "Programming Language :: Python :: 3",

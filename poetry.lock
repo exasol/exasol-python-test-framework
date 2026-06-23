@@ -2799,35 +2799,6 @@ files = [
 defusedxml = ">=0.7.1,<0.8.0"
 
 [[package]]
-name = "pyasynchat"
-version = "1.0.5"
-description = "Make asynchat available for Python 3.12 onwards"
-optional = false
-python-versions = "*"
-groups = ["main"]
-markers = "python_version == \"3.12\""
-files = [
-    {file = "pyasynchat-1.0.5-py3-none-any.whl", hash = "sha256:35b7859515693e479e8d95ebe9f32cbf4d6312ab7599ced39fc24699e51de46f"},
-    {file = "pyasynchat-1.0.5.tar.gz", hash = "sha256:36665473ae730dac51e6d7dad70f8295962120c830ab692f0a31efba32687e24"},
-]
-
-[package.dependencies]
-pyasyncore = ">=1.0.2"
-
-[[package]]
-name = "pyasyncore"
-version = "1.0.5"
-description = "Make asyncore available for Python 3.12 onwards"
-optional = false
-python-versions = "*"
-groups = ["main"]
-markers = "python_version == \"3.12\""
-files = [
-    {file = "pyasyncore-1.0.5-py3-none-any.whl", hash = "sha256:269bbc5252671827387636822841a1fb721ec6e858b23a3e12cf92eb1f97da2a"},
-    {file = "pyasyncore-1.0.5.tar.gz", hash = "sha256:dd483d5103a6d59b66b86e0ca2334ad43dca732ff23a0ac5d63c88c52510542e"},
-]
-
-[[package]]
 name = "pycparser"
 version = "3.0"
 description = "C parser in Python"
@@ -3016,26 +2987,6 @@ lint = ["ruff"]
 release = ["zest.releaser[recommended]"]
 tests = ["pydot[dev]", "pytest", "pytest-cov", "pytest-xdist[psutil]", "tox"]
 types = ["mypy"]
-
-[[package]]
-name = "pyftpdlib"
-version = "2.2.0"
-description = "Very fast asynchronous FTP server library"
-optional = false
-python-versions = ">=3.6"
-groups = ["main"]
-files = [
-    {file = "pyftpdlib-2.2.0.tar.gz", hash = "sha256:4ba0642078792df63dd3b2e9c8f838f2a3ecf428c7518d5921c0530d53512acf"},
-]
-
-[package.dependencies]
-pyasynchat = {version = "*", markers = "python_version >= \"3.12\""}
-pyasyncore = {version = "*", markers = "python_version >= \"3.12\""}
-
-[package.extras]
-dev = ["black", "build", "check-manifest", "coverage", "pdbpp ; os_name == \"nt\"", "pylint", "pyreadline3 ; os_name == \"nt\"", "pytest-cov", "pytest-xdist", "rstcheck", "ruff", "toml-sort", "twine"]
-ssl = ["PyOpenSSL"]
-test = ["psutil", "pyasynchat ; python_version >= \"3.12\"", "pyasyncore ; python_version >= \"3.12\"", "pyopenssl", "pytest", "pytest-instafail", "pytest-xdist", "pywin32 ; os_name == \"nt\"", "setuptools"]
 
 [[package]]
 name = "pygments"
@@ -4953,4 +4904,4 @@ type = ["pytest-mypy (>=1.0.1) ; platform_python_implementation != \"PyPy\""]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.13"
-content-hash = "2bbffec90f28d21802b7f6a1a6f60ac4e340876eb5b8fca8c321061c1affa5cd"
+content-hash = "3dcb1b6d9247523a9f0c640517acaa6e4b355b6bcb1da441bd85021dad73d17d"
