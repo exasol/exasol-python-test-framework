@@ -1,13 +1,18 @@
+"""Shared lightweight test servers used by the framework."""
+
 import http.server
 import select
 import socket
 import socketserver
 import threading
 
-from .. import utils
 from ..threading import Thread
+from .. import utils
 
-class BaseSimpleServer(object):
+
+class BaseSimpleServer:
+    """Base class for simple background test servers."""
+
     def __init__(self):
         self._thread = None
         self.host = None
@@ -15,6 +20,7 @@ class BaseSimpleServer(object):
 
     @property
     def address(self):
+        """Return the host/port pair for the running server."""
         return (self.host, self.port)
 
     def __enter__(self):
@@ -25,21 +31,25 @@ class BaseSimpleServer(object):
         self.stop()
 
     def start(self):
-        pass
+        """Start the server."""
+        raise NotImplementedError
 
     def stop(self):
+        """Stop the server thread."""
         self._thread.shutdown()
         self._thread.join(5)
 
 
 class MessageBox(BaseSimpleServer):
+    """Small server that stores received payloads."""
+
     def _messagebox(self, s):
         slf = threading.current_thread()
         slf.data = []
         s.listen(20)
         while not slf.shutdown_requested():
             if s in select.select([s], [], [], 1)[0]:
-                sock, addr = s.accept()
+                sock, _addr = s.accept()
                 slf.data.append(sock.recv(4096))
                 sock.close()
         s.close()
@@ -54,15 +64,19 @@ class MessageBox(BaseSimpleServer):
 
     @property
     def data(self):
+        """Return the received payload list."""
         return self._thread.data
+
 
 class _ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     pass
 
 
 class HTTPServer(BaseSimpleServer):
+    """Serve files from a temporary document root."""
+
     def __init__(self, documentroot='.'):
-        super(HTTPServer, self).__init__()
+        super().__init__()
         self.documentroot = documentroot
         self._server = None
 
@@ -81,4 +95,4 @@ class HTTPServer(BaseSimpleServer):
 
     def stop(self):
         self._server.shutdown()
-        super(HTTPServer, self).stop()
+        super().stop()

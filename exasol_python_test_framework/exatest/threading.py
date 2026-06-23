@@ -1,3 +1,5 @@
+"""Thread helper with shutdown and exception propagation support."""
+
 import sys
 import threading
 
@@ -5,7 +7,7 @@ __all__ = ['Thread', 'ThreadAliveError']
 
 
 class ThreadAliveError(Exception):
-    pass
+    """Raised when a managed thread is still alive."""
 
 
 class Thread(threading.Thread):
@@ -30,30 +32,33 @@ class Thread(threading.Thread):
     """
 
     def __init__(self, *args, **kwargs):
-        super(Thread, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.daemon = True
+        self.data = None
         self.__exc_info = None
         self.__shutdown_event = threading.Event()
 
     def run(self):
         try:
-            super(Thread, self).run()
-        except Exception:
+            super().run()
+        except Exception:  # pylint: disable=broad-exception-caught
             self.__exc_info = sys.exc_info()
 
     def join(self, timeout=None):
-        super(Thread, self).join(timeout)
+        super().join(timeout)
         # if self.is_alive():
         #    raise ThreadAliveError("thread '%s' is alive" % self.name)
         if self.__exc_info is not None:
             cls, msg, tb = self.__exc_info
             self.__exc_info = None
-            raise cls("in thread '%s': %s" % (self.name, msg)).with_traceback(tb)
+            raise cls(f"in thread '{self.name}': {msg}").with_traceback(tb)
 
     def shutdown(self):
+        """Request shutdown for the managed thread."""
         self.__shutdown_event.set()
 
     def shutdown_requested(self):
+        """Return whether shutdown has been requested."""
         return self.__shutdown_event.is_set()
 
 # vim: ts=4:sts=4:sw=4:et:fdm=indent
