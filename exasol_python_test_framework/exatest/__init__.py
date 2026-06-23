@@ -29,6 +29,7 @@ from unittest.loader import _make_failed_test
 import pyodbc
 
 from .clients.client_setup import ClientSetup
+from .testcase import useData
 from .testcase import *
 
 @contextlib.contextmanager
