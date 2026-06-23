@@ -24,6 +24,7 @@ from exasol_python_test_framework.exatest import (
     TestProgram as ExaTestProgram,
     get_sort_key,
 )
+from exasol_python_test_framework.exatest.testcase import useData
 
 from exasol_python_test_framework.exatest.clients.odbc import ODBCClient, getScriptLanguagesFromArgs
 
