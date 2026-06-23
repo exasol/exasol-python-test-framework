@@ -20,6 +20,8 @@ from unittest import (
         case,
         util
         )
+from unittest.loader import _make_failed_import_test
+from unittest.loader import _make_failed_test
 
 import pyodbc
 

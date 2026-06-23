@@ -1,4 +1,9 @@
 import csv
+import functools
+import logging
+import os
+import pyodbc
+import sys
 import subprocess
 from collections import defaultdict
 from datetime import date
@@ -6,9 +11,16 @@ from datetime import datetime
 from decimal import Decimal
 import math
 import re
+import tempfile
+import threading
+import unittest
 
-from exasol_python_test_framework import exatest
-from exasol_python_test_framework.exatest import *
+from exasol_python_test_framework.exatest import (
+    SkipTest,
+    TestCase as ExaTestCase,
+    TestProgram as ExaTestProgram,
+    get_sort_key,
+)
 
 from exasol_python_test_framework.exatest.clients.odbc import ODBCClient, getScriptLanguagesFromArgs
 
@@ -42,10 +54,10 @@ def requires(req):
             if not opts.lang:
                 raise TypeError('"@requires" is only allowed for generic tests')
             if req not in capabilities:
-                raise exatest.SkipTest('requires: %s' % req)
+                raise SkipTest('requires: %s' % req)
             return func(*args)
 
-        wrapper._sort_key = exatest.get_sort_key(func)
+        wrapper._sort_key = get_sort_key(func)
         return wrapper
 
     return dec
@@ -80,7 +92,7 @@ def fixindent(query):
         sql = fixindent("""
     lines = query.split('\n')
     ref = ''
-    indent = re.compile('^(\s+)\S+')
+    indent = re.compile(r'^(\s+)\S+')
     for line in lines:
         match = indent.match(line)
         if match:
@@ -94,7 +106,7 @@ def fixindent(query):
         return query
 
 
-class TestProgram(exatest.TestProgram):
+class TestProgram(ExaTestProgram):
     logger_name = 'udf.main'
 
     def parser_hook(self, parser):
@@ -220,7 +232,7 @@ def _split_file_on_slash(path):
 expectedFailuresForLangsDict = defaultdict(list)
 
 
-class TestCase(exatest.TestCase):
+class TestCase(ExaTestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -240,7 +252,7 @@ class TestCase(exatest.TestCase):
     def query(self, *args, **kwargs):
         new_args = list(args)
         new_args[0] = _rewrite_redirector(new_args[0], opts.redirector_url)
-        return super(TestCase, self).query(*new_args, **kwargs)
+        return super().query(*new_args, **kwargs)
 
     def query_via_exaplus(self, query):
         cmd = '''%(exaplus)s -c %(conn)s -u %(user)s -P %(password)s
