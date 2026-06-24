@@ -8,9 +8,8 @@ This project is shared among other Exasol projects, and provides a test framewor
 ## Prerequisites
 
 * Linux, macOS
-* Python3.10 and later
+* Python 3.10, 3.11, and 3.12
 
 ### On Linux
 
  * providers (packages) of unixodbc and unixodbc-development artifacts
-
