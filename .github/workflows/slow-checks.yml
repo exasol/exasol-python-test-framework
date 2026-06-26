@@ -13,7 +13,9 @@ jobs:
       matrix:
         python-version: ['3.10', '3.11', '3.12']
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - name: Get ODBC driver
         id: get-odbc-driver
         run: |
@@ -21,13 +23,15 @@ jobs:
           echo so-file="$FILE" >> "$GITHUB_OUTPUT"
       - name: Check ODBC File
         run: |
-          if [ ! -f "${{ steps.get-odbc-driver.outputs.so-file }}" ]
+          if [ ! -f "${STEPS_GET_ODBC_DRIVER_OUTPUTS_SO_FILE}" ]
           then
               echo "ODBC file not found"
               exit 1
           else
               echo "ODBC File found."
           fi
+        env:
+          STEPS_GET_ODBC_DRIVER_OUTPUTS_SO_FILE: ${{ steps.get-odbc-driver.outputs.so-file }}
       - name: Get EXAPLUS
         run: bash .github/workflows/scripts/download_exaplus.sh "$(pwd)/.."
       - name: Setup Python & Poetry Environment
@@ -47,8 +51,9 @@ jobs:
         run: |
           poetry run -- scripts/test/run_locally.sh \
              --server "localhost:8888" \
-             --odbc-driver="${{ steps.get-odbc-driver.outputs.so-file }}"
+             --odbc-driver="${STEPS_GET_ODBC_DRIVER_OUTPUTS_SO_FILE}"
         env:
           EXAPLUS: ../downloads/EXAPLUS
           TEST_DOCKER_NETWORK_NAME: db_network_test
           TEST_ENVIRONMENT_NAME: test
+          STEPS_GET_ODBC_DRIVER_OUTPUTS_SO_FILE: ${{ steps.get-odbc-driver.outputs.so-file }}

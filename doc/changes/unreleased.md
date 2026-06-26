@@ -17,6 +17,7 @@
 
 - #80: Updated to poetry 2.1.2
 - #87: Fixed variable name
+- #117: Updated `exasol-toolbox` to 10.0.0
 
 ## Internal
 
