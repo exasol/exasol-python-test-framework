@@ -6,9 +6,9 @@
 
 ## ⚠️ ATTENTION
 
-> **This project is used only by the SLC tests and must NOT be used or depended on outside of that context.**
+> **This project is used only by the Script Languages Container tests and must NOT be used or depended on outside of that context.**
 >
-> **Deprecation notice:** This repository is deprecated for general use and may be removed or changed without notice. Do not rely on it for new projects; contact the SLC team for alternatives.
+> **Deprecation notice:** This repository is deprecated for general use and may be removed or changed without notice. Do not rely on it for new projects. Use instead the [exasol-pytest-backend](https://github.com/exasol/pytest-backend/), [exasol-pytest-extension](https://github.com/exasol/pytest-extension/) or [exasol-pytest-slc](https://github.com/exasol/pytest-slc/)
 
 ---
 
