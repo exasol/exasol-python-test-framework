@@ -18,7 +18,7 @@ This project is shared among other Exasol projects, and provides a test framewor
 ## Prerequisites
 
 * Linux, macOS
-* Python 3.10, 3.11, and 3.12
+* Python 3.11 and 3.12
 
 ### On Linux
 
