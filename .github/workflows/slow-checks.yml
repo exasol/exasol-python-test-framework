@@ -13,7 +13,7 @@ jobs:
       contents: read
 
   run-integration-tests:
-    runs-on: "ubuntu-22.04"
+    runs-on: "ubuntu-26.04"
     permissions:
       contents: read
     needs:
@@ -22,7 +22,7 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJson(needs.build-matrix.outputs.matrix) }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
       - name: Get ODBC driver
@@ -44,7 +44,7 @@ jobs:
       - name: Get EXAPLUS
         run: bash .github/workflows/scripts/download_exaplus.sh "$(pwd)/.."
       - name: Setup Python & Poetry Environment
-        uses: exasol/python-toolbox/.github/actions/python-environment@v10
+        uses: exasol/python-toolbox/.github/actions/python-environment@v12
         with:
           python-version: ${{ matrix.python_versions }}
           poetry-version: "2.3.0"
