@@ -22,6 +22,7 @@ This update drops support for Python 3.10, updates the Exasol Toolbox and projec
 - #117: Updated `exasol-toolbox` to 10.0.0
 - #119: Updated `exasol-toolbox` to 10.2.0 and re-enabled `check-workflows` in `checks.yml`
 - #138: Removed support for Python 3.10 and update exasol-toolbox to 12.0.0
+- #139: Removed UDF debug output forwarding
 
 ## Internal
 
