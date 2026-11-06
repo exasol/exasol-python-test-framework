@@ -2,6 +2,8 @@
 
 ## Summary
 
+This update drops support for Python 3.10, updates the Exasol Toolbox and project dependencies, and removes UDF debug output forwarding. It also includes dependency security updates and a lockfile refresh.
+
 ## Security
 
  - #76: Updated dependencies
