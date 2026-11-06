@@ -34,7 +34,7 @@ dev = [
     "exasol-integration-test-docker-environment>=5.0.0,<6",
     "toml>=0.10.2",
     "gitpython>=3.1.0",
-    "exasol-toolbox>=10.2.0,<11",
+    "exasol-toolbox>=12.0.0,<13",
 ]
 
 [tool.poetry]
