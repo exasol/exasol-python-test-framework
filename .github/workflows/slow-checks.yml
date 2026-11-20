@@ -59,6 +59,7 @@ jobs:
       - name: Run all tests
         run: |
           poetry run -- scripts/test/run_locally.sh \
+             --coverage \
              --server "localhost:8888" \
              --odbc-driver="${STEPS_GET_ODBC_DRIVER_OUTPUTS_SO_FILE}"
         env:
@@ -66,3 +67,10 @@ jobs:
           TEST_DOCKER_NETWORK_NAME: db_network_test
           TEST_ENVIRONMENT_NAME: test
           STEPS_GET_ODBC_DRIVER_OUTPUTS_SO_FILE: ${{ steps.get-odbc-driver.outputs.so-file }}
+      - name: Upload Coverage Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-python${{ matrix.python_versions }}-slow
+          path: .coverage
+          include-hidden-files: true
+          overwrite: false
