@@ -8,7 +8,11 @@ die() { echo "ERROR:" "$@" >&2; exit 1; }
 # $2...: additional arguments passed to tests
 function run_test() {
   echo "Starting test: $1" 1>&2
-  python3 "$@"
+  if [ "${coverage:-false}" = true ]; then
+    coverage run --parallel-mode "$@"
+  else
+    python3 "$@"
+  fi
   rc=$?
   if [ $rc != 0 ]; then
       echo "FAILED: $1"
@@ -29,13 +33,14 @@ function run_tests_in_folder() {
 }
 
 
-optarr=$(getopt -o 'h' --long 'help,server:,exatest-folder:,odbc-driver:,' -- "$@")
+optarr=$(getopt -o 'h' --long 'help,coverage,server:,exatest-folder:,odbc-driver:,' -- "$@")
 
 eval set -- "$optarr"
 
 # ./run-locally.sh --server 192... --exatest-folder /home/.../tests
 while true; do
     case "$1" in
+        --coverage) coverage=true; shift;;
         --server) server="$2"; shift 2;;
         --odbc-driver) odbc_driver="$2"; shift 2;;
         --) shift; break;;
@@ -62,3 +67,6 @@ TEST_DIR="$SCRIPT_DIR/../../tests"
 run_tests_in_folder "$TEST_DIR/exatest" "$server" "$odbc_driver"
 run_tests_in_folder "$TEST_DIR/udf" "$server" "$odbc_driver" --lang foo --lang-path "$TEST_DIR/udf/lang"
 run_tests_in_folder "$TEST_DIR/docker_db_environment" "$server" "$odbc_driver"
+if [ "${coverage:-false}" = true ]; then
+    coverage combine
+fi
